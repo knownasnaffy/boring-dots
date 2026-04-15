@@ -1,0 +1,5 @@
+xdg-config/qutebrowser/*
+!xdg-config/qutebrowser/config.py
+xdg-config/BeeperTexts/*
+!xdg-config/BeeperTexts/config.json
+!xdg-config/BeeperTexts/custom.css

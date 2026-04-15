@@ -1,0 +1,44 @@
+general {
+        output_format = "i3bar"
+        colors = true
+        interval = 5
+}
+
+order += "wireless _first_"
+order += "ethernet _first_"
+order += "read_file BRIGHTNESS"
+order += "volume master"
+order += "battery all"
+order += "time"
+
+wireless _first_ {
+        format_up = "W: %essid %ip"
+        format_down = "W: down"
+}
+
+ethernet _first_ {
+        format_up = "E: %ip"
+        format_down = "E: down"
+}
+
+read_file BRIGHTNESS {
+        format = "BRI: %content%"
+        path = "/sys/class/backlight/nvidia_0/brightness"
+        color_good = "#FFFFFF"
+}
+
+volume master {
+        format = "VOL: %volume"
+        format_muted = "MUTED: %volume"
+}
+
+battery all {
+        low_threshold = 15
+        threshold_type = "percentage"
+        format = "%status: %percentage %remaining"
+        last_full_capacity = true
+}
+
+time {
+        format = "%d %a %H:%M"
+}
