@@ -15,6 +15,7 @@ c.fonts.tabs.unselected = "10pt default_family"
 c.hints.chars = "asdfjkl;wevnio"
 c.colors.webpage.preferred_color_scheme = "dark"
 c.content.javascript.clipboard = "access"
+c.content.user_stylesheets = [ str(config.configdir / 'style.css') ]
 
 c.editor.command = ["ghostty", "-e", "nvim", "{file}"]
 

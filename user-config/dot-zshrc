@@ -1,0 +1,179 @@
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME=""
+
+# just remind me to update when it's time
+zstyle ':omz:update' mode reminder
+
+# how often to auto-update (in days)
+zstyle ':omz:update' frequency 14
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# command auto-correction.
+ENABLE_CORRECTION="true"
+
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+zstyle ':omz:plugins:eza' 'dirs-first' yes
+zstyle ':omz:plugins:eza' 'git-status' yes
+zstyle ':omz:plugins:eza' icons yes
+
+plugins=(copypath eza dirhistory fzf gitfast history-substring-search safe-paste sudo zoxide zsh-autosuggestions zsh-interactive-cd extract)
+
+source $ZSH/oh-my-zsh.sh
+
+
+
+PROMPT=$'\n%{$fg_bold[cyan]%}$( local branch=$(git_current_branch); [[ -n $branch ]] && echo "%c %F{white}on %F{magenta}$branch %F{red}$(git_prompt_status)%f" || echo "%~" )\n%(?.%F{green}➜%f.%F{red}➜%f) %{$reset_color%}'
+
+ZSH_THEME_GIT_PROMPT_PREFIX=""
+ZSH_THEME_GIT_PROMPT_SUFFIX=""
+ZSH_THEME_GIT_PROMPT_DIRTY=""
+ZSH_THEME_GIT_PROMPT_CLEAN=""
+
+RPROMPT=''
+
+ZSH_THEME_GIT_PROMPT_ADDED=" "
+ZSH_THEME_GIT_PROMPT_MODIFIED=" "
+ZSH_THEME_GIT_PROMPT_DELETED=" "
+ZSH_THEME_GIT_PROMPT_RENAMED=" "
+ZSH_THEME_GIT_PROMPT_UNMERGED=" "
+ZSH_THEME_GIT_PROMPT_UNTRACKED=""
+
+
+
+bindkey -e  # Use Emacs keybindings
+
+# Custom sudo keybind
+bindkey '^[s' sudo-command-line                     # Alt+w → delete word backward
+
+# Custom word and line deletion
+bindkey '^[w' backward-kill-word                     # Alt+w → delete word backward
+bindkey '^[W' kill-whole-line                        # Alt+Shift+w → delete whole line
+bindkey '^[D' kill-line                              # Alt+Shift+d → delete forward whole line
+bindkey '^[b' backward-word                          # Alt+Shift+b → move word left
+bindkey '^[f' forward-word                           # Alt+Shift+f → move word right
+bindkey '^[o' dirhistory_zle_dirhistory_back         # Alt+o → previous directory
+bindkey '^[i' dirhistory_zle_dirhistory_future       # Alt+i → next directory
+bindkey '^[r' history-incremental-search-backward    # Alt+r → search history
+bindkey '^[a' beginning-of-line                      # Alt+a
+bindkey '^[g' end-of-line                            # Alt+g
+bindkey '^[ ' forward-word                           # Alt+Space → Accept one word from autosuggestion
+bindkey '^[x' clear-screen                           # Alt+x → Clear screen without removing buffer
+
+# Bind A+A+E (Alt+e) to run AI Chat on current buffer
+_aichat_zsh() {
+    if [[ -n "$BUFFER" ]]; then
+        local _old=$BUFFER
+        BUFFER+="  "
+        zle end-of-line
+        zle -I && zle redisplay
+        BUFFER=$(aichat -e "$_old")
+        zle end-of-line
+    fi
+}
+zle -N _aichat_zsh
+bindkey '\ee' _aichat_zsh
+
+# Copy buffer to clipboard
+copy-buffer() { echo -n $BUFFER | wl-copy }
+zle -N copy-buffer
+bindkey '^[y' copy-buffer                            # Alt+y
+
+
+
+export EDITOR='nvim'
+export VISUAL="$TERMINAL -e nvim"
+alias vi=nvim
+
+# Compilation flags
+export ARCHFLAGS="-arch $(uname -m)"
+
+# export PNPM_HOME="$HOME/.local/share/pnpm"
+# export ANDROID_HOME="$HOME/Android/Sdk"
+# export JAVA_HOME="/usr/lib/jvm/java-17-openjdk"
+# export GEM_HOME="$HOME/.local/share/gem/ruby/3.4.0/bin"
+
+# Add important paths
+path_directories=(
+  "$HOME/.local/bin"
+  # "$HOME/.cache/.bun/bin"
+  # "$HOME/.cargo/bin"
+  # "$HOME/fvm/versions/stable/bin"
+  # "$ANDROID_HOME/cmdline-tools/latest/bin"
+  # "$ANDROID_HOME/platform-tools"
+  # "$JAVA_HOME/bin"
+  # $PNPM_HOME
+  # $GEM_HOME
+)
+
+# Load the fast built-in stat module for permission checks
+zmodload -F zsh/stat b:zstat
+
+for dir in "${path_directories[@]}"; do
+  # If it's in HOME and doesn't exist, create it safely to prevent hijacking
+  if [[ "$dir" == "$HOME"* ]] && [[ ! -d $dir ]]; then
+    mkdir -p "$dir"
+    chmod 755 "$dir"
+  fi
+
+  if [[ -d $dir ]]; then
+    # Use zstat to check if the directory is world-writable (octal 0002)
+    local -A s
+    zstat -H s "$dir"
+    if [[ $(( s[mode] & 0002 )) -ne 0 ]]; then
+      continue # Skip world-writable directories for security
+    fi
+
+    [[ ":$PATH:" != *":$dir:"* ]] && export PATH="$dir:$PATH"
+  fi
+done
+
+# Compilation cache for completions
+zstyle ':completion::complete:*' use-cache on
+zstyle ':completion::complete:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/"
+
+
+
+function precmd {
+    if ! builtin zle; then
+        print -n "\e]133;D\e\\"
+    fi
+    print -Pn "\e]133;A\e\\"
+}
+
+function preexec {
+    print -n "\e]133;C\e\\"
+}
+
+
+
+alias ff=fastfetch
+
+function y() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    command yazi "$@" --cwd-file="$tmp"
+    IFS= read -r -d '' cwd < "$tmp"
+    [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+    rm -f -- "$tmp"
+}
+
+
+
+# Don't save commands starting with a space in history
+setopt HIST_IGNORE_SPACE
+
+
+# bun completions
+[ -s "/home/barinr/.bun/_bun" ] && source "/home/barinr/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

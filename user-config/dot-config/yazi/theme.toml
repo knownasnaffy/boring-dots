@@ -1,0 +1,6 @@
+[flavor]
+dark = "kanagawa"
+light = "kanagawa"
+
+[mgr]
+border_style = { fg = "#5c575a" }

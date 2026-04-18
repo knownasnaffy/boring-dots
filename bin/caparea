@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+
+import subprocess
+import time
+import sys
+import os
+from PIL import Image
+from Xlib import X, display
+import threading
+
+# --- config ---
+WALLPAPER_CMD = ["feh", "--bg-fill", os.path.expanduser("~/Pictures/wallpaper.jpg")]
+
+TMP = f"/tmp/shot_{int(time.time() * 1000)}.png"
+OUT_DIR = os.path.expanduser("~/Pictures/Screenshots")
+os.makedirs(OUT_DIR, exist_ok=True)
+
+timestamp = time.strftime("%Y%m%d-%H%M%S")
+OUT = os.path.join(OUT_DIR, f"Screenshot-{timestamp}.png")
+
+# --- overlay (runs in thread) ---
+def run_crosshair(stop_flag):
+    d = display.Display()
+    s = d.screen()
+    root = s.root
+
+    win = root.create_window(
+        0, 0,
+        s.width_in_pixels,
+        s.height_in_pixels,
+        0,
+        s.root_depth,
+        X.InputOutput,
+        X.CopyFromParent,
+        background_pixmap=X.ParentRelative,
+        override_redirect=True
+    )
+
+    win.map()
+
+    gc_black = win.create_gc(
+        foreground=0x000000,
+        line_width=3
+    )
+
+    gc_white = win.create_gc(
+        foreground=s.white_pixel,
+        line_width=1
+    )
+
+    try:
+        while not stop_flag["stop"]:
+            pointer = root.query_pointer()
+            x = pointer.root_x
+            y = pointer.root_y
+
+            # clear previous frame
+            win.clear_area()
+
+            # --- horizontal ---
+            # thick black base
+            win.poly_line(gc_black, X.CoordModeOrigin, [
+                (0, y), (s.width_in_pixels, y)
+            ])
+
+            # thin white center
+            win.poly_line(gc_white, X.CoordModeOrigin, [
+                (0, y), (s.width_in_pixels, y)
+            ])
+
+            # --- vertical ---
+            # thick black base
+            win.poly_line(gc_black, X.CoordModeOrigin, [
+                (x, 0), (x, s.height_in_pixels)
+            ])
+
+            # thin white center
+            win.poly_line(gc_white, X.CoordModeOrigin, [
+                (x, 0), (x, s.height_in_pixels)
+            ])
+
+            d.sync()
+            time.sleep(0.01)
+    finally:
+        win.unmap()
+        d.close()
+
+# --- main flow ---
+
+# 1. capture screen
+subprocess.run(["maim", TMP], check=True)
+
+# 2. set screenshot as background
+subprocess.run(["feh", "--bg-fill", TMP], check=True)
+
+# 3. start overlay thread
+stop_flag = {"stop": False}
+t = threading.Thread(target=run_crosshair, args=(stop_flag,))
+t.start()
+
+time.sleep(0.30)
+
+# 4. run slop
+result = subprocess.run(
+    ["slop", "-f", "%x,%y %w,%h"],
+    capture_output=True,
+    text=True
+)
+
+geom = result.stdout.strip()
+
+# 5. stop overlay
+stop_flag["stop"] = True
+t.join()
+
+# 6. restore wallpaper
+subprocess.run(WALLPAPER_CMD)
+
+# 7. handle cancel
+if not geom:
+    print("Selection cancelled")
+    os.remove(TMP)
+    sys.exit(1)
+
+# 8. parse geometry
+pos, size = geom.split()
+x, y = map(int, pos.split(","))
+w, h = map(int, size.split(","))
+
+if w <= 0 or h <= 0:
+    print("Invalid selection")
+    os.remove(TMP)
+    sys.exit(1)
+
+# 9. crop original screenshot
+with Image.open(TMP) as img:
+    cropped = img.crop((x, y, x + w, y + h))
+    cropped.save(OUT)
+
+# 10. cleanup
+os.remove(TMP)
+
+print("Saved:", OUT)

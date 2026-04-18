@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+TYPE="${1:-}"
+EDIT="${2:-}"
+
+OUTPUT="${HOME}/Pictures/Screenshots/Screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+if [[ -z "$TYPE" ]]; then
+  echo "Usage: $0 [screen|window] [edit]"
+  exit 1
+fi
+
+case "$TYPE" in
+  screen)
+    maim "$OUTPUT"
+    ;;
+  window)
+    # Get focused window rect from i3
+    read -r X Y W H < <(
+      i3-msg -t get_tree | jq -r '
+        .. | select(.focused?) | "\(.rect.x) \(.rect.y) \(.rect.width) \(.rect.height)"
+      '
+    )
+
+    maim -g "${W}x${H}+${X}+${Y}" "$OUTPUT"
+    ;;
+  *)
+    echo "Invalid type: $TYPE (use 'screen' or 'window')"
+    exit 1
+    ;;
+esac
+
+# Placeholder for edit functionality
+if [[ "$EDIT" == "edit" ]]; then
+  echo "Edit flag detected (not implemented yet)"
+  # future: annotate / crop / etc
+fi
+
+echo "Saved: $OUTPUT"

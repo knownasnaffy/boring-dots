@@ -48,12 +48,16 @@ vim.o.confirm = true
 vim.opt.iskeyword:remove '-'
 vim.opt.iskeyword:remove '_'
 
+vim.cmd('filetype plugin on')
+vim.cmd('syntax on')
+
 
 
 local map = vim.keymap.set
 
 map('i', '<M-q>', '<Esc>')
 map('i', '<M-s>', '<Esc><Cmd>w<CR>a')
+map('n', '<M-s>', '<Cmd>w<CR>')
 map('n', '<M-r>', '<C-r>')
 
 map('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -121,8 +125,8 @@ map('n', '<leader>wq', '<Cmd>q<CR>', { noremap = false, desc = 'Close current wi
 map('n', '<leader>woq', '<C-w>o', { desc = 'Close other windows' })
 map('n', '<leader>waq', '<Cmd>qa<CR>', { desc = 'Close all windows' })
 
-map('n', '<leader>wtn', '<Cmd>tabnew<CR>', { desc = '[N]ew tab' })
-map('n', '<leader>wtc', '<Cmd>tabclose<CR>', { desc = '[C]lose tab' })
+map('n', '<leader>wtn', '<Cmd>tabnew<CR>', { desc = 'New tab' })
+map('n', '<leader>wtc', '<Cmd>tabclose<CR>', { desc = 'Close tab' })
 map('n', '<leader>wth', '<Cmd>tabn<CR>', { desc = 'Previous tab' })
 map('n', '<leader>wtl', '<Cmd>tabN<CR>', { desc = 'Next tab' })
 
@@ -131,15 +135,133 @@ map('n', '<leader>wtl', '<Cmd>tabN<CR>', { desc = 'Next tab' })
 --  See `:help vim.hl.on_yank()`
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function() vim.hl.on_yank() end,
+  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
+  callback = function() vim.hl.on_yank({timeout=200}) end,
 })
 
+
+
 vim.pack.add({
-  'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/neovim/nvim-lspconfig',
-  'https://github.com/nvim-treesitter/nvim-treesitter',
+  -- 'https://github.com/nvim-treesitter/nvim-treesitter',
+  'https://github.com/vimwiki/vimwiki'
 })
 
 vim.cmd.packadd("nvim.undotree")
-map('n', '<leader>u', '<Cmd>Undotree<CR>', { desc = 'Open [U]ndo Tree' })
+map('n', '<leader>u', '<Cmd>Undotree<CR>', { desc = 'Open Undo Tree' })
+
+vim.cmd.packadd("vimwiki")
+map('n', '<leader>vi', '<Cmd>VimwikiIndex<CR>')
+map('n', '<leader>vg', '<Cmd>VimwikiGoto<CR>')
+map('n', '<leader>vs', ':VimwikiSearch ')
+map('n', '<leader>vb', '<Cmd>VimwikiBacklinks<CR>')
+map('n', '<leader>vtt', '<Cmd>VimwikiToggleListItem<CR>')
+map('n', '<leader>vdi', '<Cmd>VimwikiDiaryIndex<CR>')
+map('n', '<leader>vdt', '<Cmd>VimwikiMakeDiaryNote<CR>')
+map('n', '<leader>vdy', '<Cmd>VimwikiMakeYesterdayDiaryNote<CR>')
+
+
+vim.pack.add({'https://github.com/nvim-mini/mini.nvim'})
+
+local miniextra = require('mini.extra')
+miniextra.setup()
+local gen_ai_spec = miniextra.gen_ai_spec
+
+require('mini.ai').setup({
+  custom_textobjects = {
+    B = gen_ai_spec.buffer(),
+    D = gen_ai_spec.diagnostic(),
+    I = gen_ai_spec.indent(),
+    L = gen_ai_spec.line(),
+    N = gen_ai_spec.number(),
+  },
+})
+
+require('mini.comment').setup()
+require('mini.move').setup()
+require('mini.pairs').setup()
+require('mini.surround').setup()
+require('mini.bracketed').setup()
+
+local miniclue = require('mini.clue')
+miniclue.setup({
+  triggers = {
+    { mode = { 'n', 'x' }, keys = '<Leader>' },
+
+    { mode = 'n', keys = '[' },
+    { mode = 'n', keys = ']' },
+
+    -- Built-in completion
+    { mode = 'i', keys = '<C-x>' },
+
+    { mode = { 'n', 'x' }, keys = 'g' },
+
+    { mode = { 'n', 'x' }, keys = "'" },
+    { mode = { 'n', 'x' }, keys = '`' },
+
+    -- Registers
+    { mode = { 'n', 'x' }, keys = '"' },
+    { mode = { 'i', 'c' }, keys = '<C-r>' },
+
+    -- `z` key
+    { mode = { 'n', 'x' }, keys = 'z' },
+  },
+  clues = {
+    miniclue.gen_clues.square_brackets(),
+    miniclue.gen_clues.builtin_completion(),
+    miniclue.gen_clues.g(),
+    miniclue.gen_clues.marks(),
+    miniclue.gen_clues.registers(),
+    miniclue.gen_clues.windows(),
+    miniclue.gen_clues.z(),
+  }
+})
+
+require('mini.cmdline').setup()
+
+require('mini.diff').setup({
+  view = {
+    style = 'sign',
+    signs = { add = '▍', change = '▍', delete = '▍' },
+  }
+})
+map('n', '<leader>th', MiniDiff.toggle_overlay, {desc = "Toggle git hunk overlay"})
+
+require('mini.files').setup({
+  mappings = {
+    go_in       = 'L',
+    go_in_plus  = 'l',
+  }
+})
+map('n', '<leader>e', MiniFiles.open, {desc = "Open file manager"})
+
+require('mini.git').setup()
+map('n', '<leader>gs', MiniGit.show_at_cursor, {desc = "Show git at cursor"})
+
+require('mini.pick').setup()
+map('n', '<leader>sf', MiniPick.builtin.files, {desc = "Search files"})
+map('n', '<leader>sg', MiniPick.builtin.grep_live, {desc = "Grep files live"})
+map('n', '<leader>sh', MiniPick.builtin.help, {desc = "Search help pages"})
+map('n', '<leader>sr', MiniPick.builtin.resume, {desc = "Resume latest picker"})
+
+
+require('mini.cursorword').setup()
+require('mini.icons').setup()
+
+require('mini.notify').setup()
+map('n', '<leader>sn', MiniNotify.show_history, {desc = "Show notifications"})
+
+require('mini.tabline').setup()
+
+-- Dashboard
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1 then
+      local buf = vim.api.nvim_get_current_buf()
+
+      -- TODO: Restore session with this
+      vim.keymap.set("n", "s", MiniPick.builtin.grep_live, { buffer = buf })
+      vim.keymap.set("n", "q", "<cmd>qa<cr>", { buffer = buf })
+    end
+  end,
+})

@@ -1,0 +1,39 @@
+[user]
+	name = Barinderpreet Singh
+	email = 64461700+knownasnaffy@users.noreply.github.com
+[credential]
+	helper = cache
+[credential "https://github.com"]
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://dev.azure.com"]
+	useHttpPath = true
+[commit]
+	gpgsign = false
+[tag]
+	gpgSign = false
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	default = current
+	autoSetupRemote = true
+[color]
+	ui = auto
+[rebase]
+	autosquash = true
+[core]
+	editor = nvim
+	pager = cat
+[fetch]
+	prune = true   # Automatically delete remote-tracking branches that no longer exist
+[merge]
+	ff = only  # Forces fast-forward merges and avoids unnecessary merge commits
+[gc]
+	auto = 256   # Reduce the frequency of automatic garbage collection
+[status]
+	showUntrackedFiles = all
+[alias]
+	commit-date = "!f() { GIT_COMMITTER_DATE=\"$1\" git commit --amend --no-edit --date=\"$1\"; }; f"
