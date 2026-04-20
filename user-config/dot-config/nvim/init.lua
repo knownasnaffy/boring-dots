@@ -301,6 +301,13 @@ map('n', '<leader>gA', '<Cmd>Git add .<CR>', {desc = "Git add all files"})
 map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>', {desc = "Git add current file"})
 map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>', {desc = "Git add current file"})
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "gitcommit",
+  callback = function()
+    vim.cmd("startinsert")
+  end,
+})
+
 require('mini.pick').setup()
 map('n', '<leader>sf', MiniPick.builtin.files, {desc = "Search files"})
 map('n', '<leader>sg', MiniPick.builtin.grep_live, {desc = "Grep files live"})
