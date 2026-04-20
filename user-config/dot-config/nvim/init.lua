@@ -329,7 +329,28 @@ map('n', '<leader>gs', MiniGit.show_at_cursor,
   { desc = "Show git object at cursor" })
 map('n', '<leader>ge', '<Cmd>Git status<CR>', {desc = "Git status"})
 
-map('n', '<leader>gc', '<Cmd>Git commit<CR>', {desc = "Git commit"})
+map('n', '<leader>gc', function()
+  local data = MiniGit.get_buf_data(0)
+
+  if not data or not data.root then
+    vim.notify('Not in a Git repository')
+    return
+  end
+
+  local message = vim.fn.input 'Commit message: '
+
+  if message ~= '' then
+    local command = { 'git', 'commit', '-m', message }
+    vim.system(command, { cwd = data.root, text = true }, function(obj)
+      if obj.code == 0 then
+        vim.notify(obj.stdout)
+      else
+        vim.notify('Git failed: ' .. obj.stderr)
+      end
+    end)
+
+  else print 'Commit canceled.' end
+end, {desc = "Git commit"})
 map('n', '<leader>gC', '<Cmd>Git commit --amend --no-edit<CR>',
   { desc = "Git commit amend" })
 
