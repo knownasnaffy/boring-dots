@@ -183,7 +183,10 @@ vim.pack.add({
   -- 'https://github.com/nvim-treesitter/nvim-treesitter',
   'https://github.com/vimwiki/vimwiki',
   'https://github.com/NMAC427/guess-indent.nvim',
-  'https://github.com/mason-org/mason.nvim'
+  'https://github.com/mason-org/mason.nvim',
+  'https://github.com/romgrk/barbar.nvim',
+  'https://github.com/olimorris/persisted.nvim',
+  'https://github.com/nvim-mini/mini.nvim'
 })
 
 vim.cmd.packadd("nvim.undotree")
@@ -211,7 +214,6 @@ require('guess-indent').setup({
 require('mason').setup()
 map('n', '<leader>om', '<Cmd>Mason<CR>')
 
-vim.pack.add({'https://github.com/nvim-mini/mini.nvim'})
 
 local miniextra = require('mini.extra')
 miniextra.setup()
@@ -231,6 +233,7 @@ require('mini.comment').setup()
 require('mini.move').setup()
 require('mini.pairs').setup()
 require('mini.surround').setup()
+
 require('mini.bracketed').setup()
 
 local miniclue = require('mini.clue')
@@ -296,8 +299,10 @@ map('n', '<leader>gC', '<Cmd>Git commit --amend --no-edit<CR>',
   { desc = "Git commit amend" })
 map('n', '<leader>ga', '<Cmd>Git add %<CR>', {desc = "Git add current file"})
 map('n', '<leader>gA', '<Cmd>Git add .<CR>', {desc = "Git add all files"})
-map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>', {desc = "Git add current file"})
-map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>', {desc = "Git add current file"})
+map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>',
+  {desc = "Git add current file"})
+map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>',
+  {desc = "Git add current file"})
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "gitcommit",
@@ -322,11 +327,13 @@ map('n', '<leader>sq', function()
     MiniExtra.pickers.list({scope='quickfix'})
   end, { desc = "Search quickfix list" })
 map('n', '<leader>sm', MiniExtra.pickers.manpages, { desc = "Search manpages" })
-map('n', '<leader>so', MiniExtra.pickers.oldfiles, { desc = "Search old files" })
-
+map('n', '<leader>so', MiniExtra.pickers.oldfiles,
+  { desc = "Search old files" })
 
 require('mini.cursorword').setup()
+
 require('mini.icons').setup()
+MiniIcons.mock_nvim_web_devicons()
 
 require('mini.notify').setup()
 map('n', '<leader>sn', MiniNotify.show_history, {desc = "Show notifications"})
@@ -347,11 +354,6 @@ starter.setup({
   silent = false,
 })
 
-require('mini.tabline').setup()
-vim.api.nvim_set_hl(0, "MiniTablineFill", { link = "Tabline" })
-vim.api.nvim_set_hl(0, "MiniTablineHidden", { link = "MiniTablineFill" })
-vim.api.nvim_set_hl(0, "MiniTablineCurrent", { link = "Normal" })
-
 require('mini.trailspace').setup()
 vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function()
@@ -359,3 +361,94 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     MiniTrailspace.trim_last_lines()
   end,
 })
+
+require('persisted').setup({
+  should_save = function ()
+    local cwd = vim.loop.cwd()  -- fast + clean
+
+    local blocklist = {
+      vim.fn.expand("~"), vim.fn.expand("~/.config")
+    }
+
+    for _, path in ipairs(blocklist) do
+      if cwd == path then
+        return false
+      end
+    end
+
+    return true
+  end
+})
+
+vim.g.barbar_auto_setup = false
+require('barbar').setup({
+  auto_hide = 0,
+  animation = false,
+  highlight_visible = true,
+  icons = {
+    button = false,
+    filetype = {
+      custom_colors = false,
+      enabled = true,
+    },
+  }
+})
+
+vim.api.nvim_set_hl(0, "BufferCurrent", { link = "Normal" })
+vim.api.nvim_set_hl(0, "BufferCurrentSign",
+  { bg = "NvimDarkGrey2", fg = "NvimLightBlue" })
+
+vim.opt.sessionoptions:append 'globals'
+vim.api.nvim_create_autocmd({ 'User' }, {
+  pattern = 'PersistedSavePre',
+  group = vim.api.nvim_create_augroup('PersistedHooks', {}),
+  callback = function()
+    vim.api.nvim_exec_autocmds('User', { pattern = 'SessionSavePre' })
+  end,
+})
+
+local function buffer_switch(direction)
+  local count = vim.v.count > 0 and vim.v.count or 1
+  vim.cmd((direction == 'next' and 'BufferNext ' or 'BufferPrevious ') .. count)
+end
+
+map('n', '<A-.>', function() buffer_switch 'next' end,
+  { desc = 'Go to next buffer' })
+map('n', '<A-,>', function() buffer_switch 'previous' end,
+  { desc = 'Go to previous buffer' })
+
+map('n', '<A-S-,>', '<Cmd>BufferMovePrevious<CR>')
+map('n', '<A-S-.>', '<Cmd>BufferMoveNext<CR>')
+
+map('n', '<leader>br', '<Cmd>BufferRestore<CR>',
+  { desc = 'Restore last close buffer' })
+
+map('n', '<A-S-p>', '<Cmd>BufferPin<CR>')
+
+map('n', '<leader>bp', '<Cmd>BufferPick<CR>',
+  { desc = 'Magic buffer [P]icker' })
+map('n', '<leader>bd', '<Cmd>BufferPickDelete<CR>',
+  { desc = 'Magic buffer [D]eleter' })
+
+map('n', '<leader>bqo', '<Cmd>BufferCloseAllButCurrentOrPinned<CR>',
+  { desc = 'Close [O]ther buffers' })
+map('n', '<leader>bqr', '<Cmd>BufferCloseBuffersRight<CR>',
+  { desc = 'Close buffers to the [R]ight' })
+map('n', '<leader>bql', '<Cmd>BufferCloseBuffersLeft<CR>',
+  { desc = 'Close buffers to the [L]eft' })
+map('n', '<leader>bqq', '<Cmd>BufferClose<CR>',
+  { desc = 'Close Current buffer' })
+
+map('n', '<leader>bwc', '<Cmd>w<CR>', { desc = 'Write Current file' })
+map('n', '<leader>bwa', '<Cmd>wa<CR>', { desc = 'Write All files' })
+
+map('n', '<A-1>', '<Cmd>BufferGoto 1<CR>')
+map('n', '<A-2>', '<Cmd>BufferGoto 2<CR>')
+map('n', '<A-3>', '<Cmd>BufferGoto 3<CR>')
+map('n', '<A-4>', '<Cmd>BufferGoto 4<CR>')
+map('n', '<A-5>', '<Cmd>BufferGoto 5<CR>')
+map('n', '<A-6>', '<Cmd>BufferGoto 6<CR>')
+map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>')
+map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>')
+map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>')
+map('n', '<A-0>', '<Cmd>BufferLast<CR>')
