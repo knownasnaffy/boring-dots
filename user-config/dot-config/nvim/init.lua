@@ -417,8 +417,8 @@ map('n', '<A-.>', function() buffer_switch 'next' end,
 map('n', '<A-,>', function() buffer_switch 'previous' end,
   { desc = 'Go to previous buffer' })
 
-map('n', '<A-S-,>', '<Cmd>BufferMovePrevious<CR>')
-map('n', '<A-S-.>', '<Cmd>BufferMoveNext<CR>')
+map('n', '<A-<>', '<Cmd>BufferMovePrevious<CR>')
+map('n', '<A->>', '<Cmd>BufferMoveNext<CR>')
 
 map('n', '<leader>br', '<Cmd>BufferRestore<CR>',
   { desc = 'Restore last close buffer' })
@@ -426,16 +426,16 @@ map('n', '<leader>br', '<Cmd>BufferRestore<CR>',
 map('n', '<A-S-p>', '<Cmd>BufferPin<CR>')
 
 map('n', '<leader>bp', '<Cmd>BufferPick<CR>',
-  { desc = 'Magic buffer [P]icker' })
+  { desc = 'Magic buffer Picker' })
 map('n', '<leader>bd', '<Cmd>BufferPickDelete<CR>',
-  { desc = 'Magic buffer [D]eleter' })
+  { desc = 'Magic buffer Deleter' })
 
 map('n', '<leader>bqo', '<Cmd>BufferCloseAllButCurrentOrPinned<CR>',
-  { desc = 'Close [O]ther buffers' })
+  { desc = 'Close Other buffers' })
 map('n', '<leader>bqr', '<Cmd>BufferCloseBuffersRight<CR>',
-  { desc = 'Close buffers to the [R]ight' })
+  { desc = 'Close buffers to the Right' })
 map('n', '<leader>bql', '<Cmd>BufferCloseBuffersLeft<CR>',
-  { desc = 'Close buffers to the [L]eft' })
+  { desc = 'Close buffers to the Left' })
 map('n', '<leader>bqq', '<Cmd>BufferClose<CR>',
   { desc = 'Close Current buffer' })
 
