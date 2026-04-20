@@ -8,14 +8,12 @@ else
 fi
 
 default_packages=(
-  aria2 brightnessctl btop git fastfetch fuse fuse-libs maim
-  python3-xlib qutebrowser ripgrep slop xev zathura
-  zathura-pdf-poppler zsh tealdeer pass
+  aria2 brightnessctl btop git fastfetch fuse fuse-libs maim python3-xlib
+  qutebrowser ripgrep slop xev zathura zathura-pdf-poppler zsh tealdeer pass
 )
 
 optional_packages=(
-  pandoc texlive-schema-full sane-backends simple-scan rustup
-  obs-studio
+  pandoc texlive-schema-full sane-backends simple-scan rustup obs-studio
 )
 
 case "$option" in
