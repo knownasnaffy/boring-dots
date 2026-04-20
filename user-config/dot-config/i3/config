@@ -187,8 +187,8 @@ mode "bye" {
 bindsym $mod+b mode "bye"
 
 mode "screenshot" {
-        bindsym s exec ~/.local/bin/screenshot screen; mode "default"
-        bindsym w exec ~/.local/bin/screenshot window; mode "default"
+        bindsym s exec ~/.local/bin/screenshot --screen; mode "default"
+        bindsym w exec ~/.local/bin/screenshot --window; mode "default"
         bindsym a exec ~/.local/bin/caparea; mode "default"
 
         bindsym q mode "default"
