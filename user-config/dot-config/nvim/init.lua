@@ -289,7 +289,17 @@ require('mini.files').setup({
     go_in_plus  = 'l',
   }
 })
-map('n', '<leader>e', MiniFiles.open, {desc = "Open file manager"})
+
+local function open_mini_files_here()
+  local buf_name = vim.api.nvim_buf_get_name(0)
+
+  if buf_name == "" then
+    MiniFiles.open(vim.loop.cwd())
+  else
+    MiniFiles.open(buf_name)
+  end
+end
+map('n', '<leader>e', open_mini_files_here, {desc = "Open file manager"})
 
 require('mini.git').setup()
 map('n', '<leader>gs', MiniGit.show_at_cursor,
