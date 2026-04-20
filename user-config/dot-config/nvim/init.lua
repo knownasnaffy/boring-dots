@@ -231,9 +231,7 @@ require('mini.comment').setup()
 require('mini.move').setup()
 require('mini.pairs').setup()
 require('mini.surround').setup()
-require('mini.bracketed').setup({
-  comment = { suffix = 'gc', options = {} },
-})
+require('mini.bracketed').setup()
 
 local miniclue = require('mini.clue')
 miniclue.setup({
