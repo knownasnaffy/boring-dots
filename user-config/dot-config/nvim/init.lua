@@ -302,18 +302,56 @@ end
 map('n', '<leader>e', open_mini_files_here, {desc = "Open file manager"})
 
 require('mini.git').setup()
+
+local function run_git(cmd, success_msg, opts)
+  local data = MiniGit.get_buf_data(0)
+
+  if not data or not data.root then
+    vim.notify('Not in a Git repository')
+    return
+  end
+
+  if opts and opts.block_during_in_progress and data.in_progress ~= '' then
+    vim.notify('Git operation in progress: ' .. data.in_progress)
+    return
+  end
+
+  vim.system(cmd, { cwd = data.root, text = true }, function(obj)
+    if obj.code == 0 then
+      vim.notify(success_msg)
+    else
+      vim.notify('Git failed: ' .. obj.stderr)
+    end
+  end)
+end
+
 map('n', '<leader>gs', MiniGit.show_at_cursor,
   { desc = "Show git object at cursor" })
 map('n', '<leader>ge', '<Cmd>Git status<CR>', {desc = "Git status"})
+
 map('n', '<leader>gc', '<Cmd>Git commit<CR>', {desc = "Git commit"})
 map('n', '<leader>gC', '<Cmd>Git commit --amend --no-edit<CR>',
   { desc = "Git commit amend" })
+
 map('n', '<leader>ga', '<Cmd>Git add %<CR>', {desc = "Git add current file"})
 map('n', '<leader>gA', '<Cmd>Git add .<CR>', {desc = "Git add all files"})
 map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>',
   {desc = "Git add current file"})
 map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>',
   {desc = "Git add current file"})
+map('n', '<leader>gl', '<Cmd>Git log<CR>', {desc = "Git log"})
+
+map('n', '<leader>gp', function()
+  run_git({ 'git', 'push' }, 'Pushed changes to remote.')
+end, { desc = "Git push" })
+map('n', '<leader>gP', function()
+  run_git({ 'git', 'pull' }, 'Pulled changes from remote.', {
+    block_during_in_progress = true,
+  })
+end, { desc = "Git pull" })
+map('n', '<leader>gF', function()
+  run_git({ 'git', 'fetch' }, 'Fetched changes from remote.')
+end, { desc = "Git fetch" })
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "gitcommit",
