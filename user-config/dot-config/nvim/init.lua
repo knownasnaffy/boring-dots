@@ -22,7 +22,9 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
--- vim.o.signcolumn = 'yes'
+vim.o.signcolumn = 'yes'
+
+vim.opt.colorcolumn = "81"
 
 -- Time before writing to swapfile after you stop typing
 vim.o.updatetime = 250
@@ -41,8 +43,14 @@ vim.o.inccommand = 'split'
 vim.o.cursorline = true
 vim.o.scrolloff = 10
 
--- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
--- instead raise a dialog asking if you wish to save the current file(s)
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+
+-- if performing an operation that would fail due to unsaved changes in the
+-- buffer (like `:q`), instead raise a dialog asking if you wish to save the
+-- current file(s)
 vim.o.confirm = true
 
 vim.opt.iskeyword:remove '-'
@@ -79,8 +87,12 @@ map({ 'n', 'x' }, '<M-u>', '<C-u>')
 map({ 'n', 'x' }, '<M-b>', '<C-b>')
 
 
-map({ 'n', 'x' }, '<leader>h', '^', { desc = 'Move to the first non-blank character in the line' })
-map({ 'n', 'x' }, '<leader>l', '$', { desc = 'Move to the last character in the line' })
+map({ 'n', 'x' }, '<leader>h', '^', {
+  desc = 'Move to the first non-blank character in the line'
+})
+map({ 'n', 'x' }, '<leader>l', '$', {
+  desc = 'Move to the last character in the line'
+})
 map('n', '0', 'g0', { desc = 'Move to beginning of display line' })
 map('n', '$', 'g$', { desc = 'Move to end of display line' })
 
@@ -99,30 +111,55 @@ map({ 'c', 'i' }, '<A-d>', '<C-Del>', { desc = 'Delete word forward' })
 map({ 'n' }, '<A-o>', '<C-o>')
 map({ 'n' }, '<A-i>', '<C-i>')
 
+local function wcmd(cmd)
+  return function ()
+    vim.cmd.wincmd(cmd)
+  end
+end
 
-map('n', '<leader>wh', '<C-w>h', { desc = 'Move focus to the left window' })
-map('n', '<leader>wl', '<C-w>l', { desc = 'Move focus to the right window' })
-map('n', '<leader>wj', '<C-w>j', { desc = 'Move focus to the lower window' })
-map('n', '<leader>wk', '<C-w>k', { desc = 'Move focus to the upper window' })
+local function move_or_exec(dir, cmd)
+  return function()
+    local current = vim.fn.winnr()
+    local target = vim.fn.winnr(dir)
+
+    if target == current then
+      -- no window in that direction
+      vim.fn.jobstart(cmd, { detach = true })
+    else
+      vim.cmd.wincmd(dir)
+    end
+  end
+end
+
+map('n', '<leader>wh', move_or_exec( "h", "i3-msg focus left"),
+  { desc = 'Move focus to the left window' })
+map('n', '<leader>wl', move_or_exec( "l", "i3-msg focus right"),
+  { desc = 'Move focus to the right window' })
+map('n', '<leader>wj', move_or_exec( "j", "i3-msg focus down"),
+  { desc = 'Move focus to the lower window' })
+map('n', '<leader>wk', move_or_exec( "k", "i3-msg focus up"),
+  { desc = 'Move focus to the upper window' })
 map('n', '<leader>ww', '<C-w>w', { desc = 'Switch window' })
+map('n', '<leader>wW', wcmd("W"), { desc = 'Switch window' })
 
-map('n', '<leader>w+', '<C-w>+', { desc = 'Increase window height' })
-map('n', '<leader>w-', '<C-w>-', { desc = 'Decrease window height' })
-map('n', '<leader>w>', '<C-w>>', { desc = 'Increase window width' })
-map('n', '<leader>w<', '<C-w><', { desc = 'Decrease window width' })
+map('n', '<leader>w+', wcmd("+"), { desc = 'Increase window height' })
+map('n', '<leader>w-', wcmd('-'), { desc = 'Decrease window height' })
+map('n', '<leader>w>', wcmd('>'), { desc = 'Increase window width' })
+map('n', '<leader>w<', wcmd('<'), { desc = 'Decrease window width' })
 
-map('n', '<leader>ws', '<C-w>s', { desc = 'Split window horizontally' })
-map('n', '<leader>wv', '<C-w>v', { desc = 'Split window vertically' })
-map('n', '<leader>wm', '<C-w>| <C-w>_', { desc = 'Maximize window' })
-map('n', '<leader>wr', '<C-w>=', { desc = 'Reset window sizes' })
+map('n', '<leader>ws', wcmd('s'), { desc = 'Split window horizontally' })
+map('n', '<leader>wv', wcmd('v'), { desc = 'Split window vertically' })
+map('n', '<leader>wm', wcmd('_'), { desc = 'Maximize window' })
+map('n', '<leader>wr', wcmd('='), { desc = 'Reset window sizes' })
 
-map('n', '<leader>wH', '<C-w>H', { desc = 'Move current window to the left' })
-map('n', '<leader>wL', '<C-w>L', { desc = 'Move current window to the right' })
-map('n', '<leader>wJ', '<C-w>J', { desc = 'Move current window to the bottom' })
-map('n', '<leader>wK', '<C-w>K', { desc = 'Move current window to the top' })
+map('n', '<leader>wH', wcmd('H'), { desc = 'Move current window to the left' })
+map('n', '<leader>wL', wcmd('L'), { desc = 'Move current window to the right' })
+map('n', '<leader>wJ', wcmd('J'),
+  { desc = 'Move current window to the bottom' })
+map('n', '<leader>wK', wcmd('K'), { desc = 'Move current window to the top' })
 
-map('n', '<leader>wq', '<Cmd>q<CR>', { noremap = false, desc = 'Close current window' })
-map('n', '<leader>woq', '<C-w>o', { desc = 'Close other windows' })
+map('n', '<leader>wq', wcmd('q'), { desc = 'Close current window' })
+map('n', '<leader>woq', wcmd('o'), { desc = 'Close other windows' })
 map('n', '<leader>waq', '<Cmd>qa<CR>', { desc = 'Close all windows' })
 
 map('n', '<leader>wtn', '<Cmd>tabnew<CR>', { desc = 'New tab' })
@@ -144,7 +181,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.pack.add({
   'https://github.com/neovim/nvim-lspconfig',
   -- 'https://github.com/nvim-treesitter/nvim-treesitter',
-  'https://github.com/vimwiki/vimwiki'
+  'https://github.com/vimwiki/vimwiki',
+  'https://github.com/NMAC427/guess-indent.nvim',
+  'https://github.com/mason-org/mason.nvim'
 })
 
 vim.cmd.packadd("nvim.undotree")
@@ -160,6 +199,17 @@ map('n', '<leader>vdi', '<Cmd>VimwikiDiaryIndex<CR>')
 map('n', '<leader>vdt', '<Cmd>VimwikiMakeDiaryNote<CR>')
 map('n', '<leader>vdy', '<Cmd>VimwikiMakeYesterdayDiaryNote<CR>')
 
+require('guess-indent').setup({
+  on_space_options = {
+    ["expandtab"] = true,
+    ["tabstop"] = "detected",
+    ["softtabstop"] = "detected",
+    ["shiftwidth"] = "detected",
+  },
+})
+
+require('mason').setup()
+map('n', '<leader>om', '<Cmd>Mason<CR>')
 
 vim.pack.add({'https://github.com/nvim-mini/mini.nvim'})
 
@@ -181,7 +231,9 @@ require('mini.comment').setup()
 require('mini.move').setup()
 require('mini.pairs').setup()
 require('mini.surround').setup()
-require('mini.bracketed').setup()
+require('mini.bracketed').setup({
+  comment = { suffix = 'gc', options = {} },
+})
 
 local miniclue = require('mini.clue')
 miniclue.setup({
@@ -225,7 +277,9 @@ require('mini.diff').setup({
     signs = { add = '▍', change = '▍', delete = '▍' },
   }
 })
-map('n', '<leader>th', MiniDiff.toggle_overlay, {desc = "Toggle git hunk overlay"})
+map('n', '<leader>th', MiniDiff.toggle_overlay, {
+  desc = "Toggle git hunk overlay"
+})
 
 require('mini.files').setup({
   mappings = {
@@ -236,13 +290,34 @@ require('mini.files').setup({
 map('n', '<leader>e', MiniFiles.open, {desc = "Open file manager"})
 
 require('mini.git').setup()
-map('n', '<leader>gs', MiniGit.show_at_cursor, {desc = "Show git at cursor"})
+map('n', '<leader>gs', MiniGit.show_at_cursor,
+  { desc = "Show git object at cursor" })
+map('n', '<leader>ge', '<Cmd>Git status<CR>', {desc = "Git status"})
+map('n', '<leader>gc', '<Cmd>Git commit<CR>', {desc = "Git commit"})
+map('n', '<leader>gC', '<Cmd>Git commit --amend --no-edit<CR>',
+  { desc = "Git commit amend" })
+map('n', '<leader>ga', '<Cmd>Git add %<CR>', {desc = "Git add current file"})
+map('n', '<leader>gA', '<Cmd>Git add .<CR>', {desc = "Git add all files"})
+map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>', {desc = "Git add current file"})
+map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>', {desc = "Git add current file"})
 
 require('mini.pick').setup()
 map('n', '<leader>sf', MiniPick.builtin.files, {desc = "Search files"})
 map('n', '<leader>sg', MiniPick.builtin.grep_live, {desc = "Grep files live"})
 map('n', '<leader>sh', MiniPick.builtin.help, {desc = "Search help pages"})
 map('n', '<leader>sr', MiniPick.builtin.resume, {desc = "Resume latest picker"})
+map('n', '<leader>sd', MiniExtra.pickers.diagnostic,
+  { desc = "Search diagnostics" })
+map('n', '<leader>sc', MiniExtra.pickers.commands,
+  { desc = "Search commands" })
+map('n', '<leader>sb', MiniExtra.pickers.git_branches,
+  { desc = "Search git branches" })
+map('n', '<leader>sk', MiniExtra.pickers.keymaps, { desc = "Search keymaps" })
+map('n', '<leader>sq', function()
+    MiniExtra.pickers.list({scope='quickfix'})
+  end, { desc = "Search quickfix list" })
+map('n', '<leader>sm', MiniExtra.pickers.manpages, { desc = "Search manpages" })
+map('n', '<leader>so', MiniExtra.pickers.oldfiles, { desc = "Search old files" })
 
 
 require('mini.cursorword').setup()
@@ -251,17 +326,31 @@ require('mini.icons').setup()
 require('mini.notify').setup()
 map('n', '<leader>sn', MiniNotify.show_history, {desc = "Show notifications"})
 
+local starter = require('mini.starter')
+starter.setup({
+  evaluate_single = false,
+  items = {
+      starter.sections.builtin_actions(),
+      starter.sections.pick(),
+      starter.sections.recent_files(5, true),
+      starter.sections.sessions(5, true)
+  },
+  content_hooks = {
+    starter.gen_hook.adding_bullet(""),
+      starter.gen_hook.aligning('center', 'center'),
+  },
+  silent = false,
+})
+
 require('mini.tabline').setup()
+vim.api.nvim_set_hl(0, "MiniTablineFill", { link = "Tabline" })
+vim.api.nvim_set_hl(0, "MiniTablineHidden", { link = "MiniTablineFill" })
+vim.api.nvim_set_hl(0, "MiniTablineCurrent", { link = "Normal" })
 
--- Dashboard
-vim.api.nvim_create_autocmd("VimEnter", {
+require('mini.trailspace').setup()
+vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function()
-    if vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1 then
-      local buf = vim.api.nvim_get_current_buf()
-
-      -- TODO: Restore session with this
-      vim.keymap.set("n", "s", MiniPick.builtin.grep_live, { buffer = buf })
-      vim.keymap.set("n", "q", "<cmd>qa<cr>", { buffer = buf })
-    end
+    MiniTrailspace.trim()
+    MiniTrailspace.trim_last_lines()
   end,
 })
