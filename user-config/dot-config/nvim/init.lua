@@ -186,7 +186,8 @@ vim.pack.add({
   'https://github.com/mason-org/mason.nvim',
   'https://github.com/romgrk/barbar.nvim',
   'https://github.com/olimorris/persisted.nvim',
-  'https://github.com/nvim-mini/mini.nvim'
+  'https://github.com/nvim-mini/mini.nvim',
+  'https://github.com/folke/snacks.nvim'
 })
 
 vim.cmd.packadd("nvim.undotree")
@@ -338,32 +339,19 @@ MiniIcons.mock_nvim_web_devicons()
 require('mini.notify').setup()
 map('n', '<leader>sn', MiniNotify.show_history, {desc = "Show notifications"})
 
-local starter = require('mini.starter')
-starter.setup({
-  evaluate_single = false,
-  items = {
-      starter.sections.builtin_actions(),
-      starter.sections.pick(),
-      starter.sections.recent_files(5, true),
-      starter.sections.sessions(5, true)
-  },
-  content_hooks = {
-    starter.gen_hook.adding_bullet(""),
-      starter.gen_hook.aligning('center', 'center'),
-  },
-  silent = false,
-})
-
-require('mini.trailspace').setup()
 vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function()
-    MiniTrailspace.trim()
-    MiniTrailspace.trim_last_lines()
+    require('mini.trailspace').trim()
+    require('mini.trailspace').trim_last_lines()
   end,
 })
 
 require('persisted').setup({
   should_save = function ()
+    if vim.bo.filetype == "snacks_dashboard" then
+      return false
+    end
+
     local cwd = vim.loop.cwd()  -- fast + clean
 
     local blocklist = {
@@ -379,6 +367,43 @@ require('persisted').setup({
     return true
   end
 })
+
+require('snacks').setup({
+  buffdelete = { enabled = true },
+  dashboard = {
+    preset = {
+      keys = {
+        { icon = " ", key = "f", desc = "Find File",
+          action = MiniPick.builtin.files },
+        { icon = " ", key = "g", desc = "Find Text",
+          action = MiniPick.builtin.grep_live },
+        { icon = " ", key = "r", desc = "Recent Files",
+          action = MiniExtra.pickers.oldfiles },
+        { icon = " ", key = "s", desc = "Restore Session",
+          action = ":Persisted load" },
+        { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+      },
+    },
+    sections = {
+      { section = 'keys', gap = 1, padding = 1 },
+    },
+  },
+  gitbrowse = {
+    what = "branch"
+  },
+  quickfile = { enabled = true },
+  scope = {}
+})
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "MiniFilesActionRename",
+  callback = function(event)
+    Snacks.rename.on_rename_file(event.data.from, event.data.to)
+  end,
+})
+
+map('n', '<leader>gB', function() Snacks.gitbrowse() end,
+  { desc = 'Open current git remote in browser' })
 
 vim.g.barbar_auto_setup = false
 require('barbar').setup({
@@ -430,13 +455,9 @@ map('n', '<leader>bp', '<Cmd>BufferPick<CR>',
 map('n', '<leader>bd', '<Cmd>BufferPickDelete<CR>',
   { desc = 'Magic buffer Deleter' })
 
-map('n', '<leader>bqo', '<Cmd>BufferCloseAllButCurrentOrPinned<CR>',
+map('n', '<leader>bqo', function() Snacks.bufdelete.other() end,
   { desc = 'Close Other buffers' })
-map('n', '<leader>bqr', '<Cmd>BufferCloseBuffersRight<CR>',
-  { desc = 'Close buffers to the Right' })
-map('n', '<leader>bql', '<Cmd>BufferCloseBuffersLeft<CR>',
-  { desc = 'Close buffers to the Left' })
-map('n', '<leader>bqq', '<Cmd>BufferClose<CR>',
+map('n', '<A-q>', function() Snacks.bufdelete() end,
   { desc = 'Close Current buffer' })
 
 map('n', '<leader>bwc', '<Cmd>w<CR>', { desc = 'Write Current file' })
