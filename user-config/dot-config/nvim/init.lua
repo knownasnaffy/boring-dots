@@ -563,3 +563,10 @@ require('toggleterm').setup({--[[ things you want to change go here]]
 
 map('n', '<A-`>', ':ToggleTerm<CR>', { desc = 'Toggle terminal' })
 map('t', '<A-`>', '<Cmd>ToggleTerm<CR>', { desc = 'Hide terminal' })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "toggleterm",
+  callback = function()
+    vim.opt_local.laststatus = 0
+  end,
+})
