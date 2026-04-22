@@ -188,6 +188,7 @@ vim.pack.add({
   'https://github.com/olimorris/persisted.nvim',
   'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/akinsho/toggleterm.nvim',
+  'https://github.com/iamcco/markdown-preview.nvim',
   'https://github.com/folke/snacks.nvim'
 })
 
@@ -570,3 +571,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.laststatus = 0
   end,
 })
+
+-- vim.cmd.packadd("markdown-preview")
+vim.fn["mkdp#util#install"]()
+map('n', '<leader>om', '<Cmd>MarkdownPreview<CR>', { desc = 'Open markdown preview' })
