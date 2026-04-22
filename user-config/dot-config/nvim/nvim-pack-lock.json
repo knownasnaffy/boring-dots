@@ -28,6 +28,10 @@
       "rev": "ad9ede6a9cddf16cedbd31b8932d6dcdee9b716e",
       "src": "https://github.com/folke/snacks.nvim"
     },
+    "toggleterm.nvim": {
+      "rev": "9a88eae817ef395952e08650b3283726786fb5fb",
+      "src": "https://github.com/akinsho/toggleterm.nvim"
+    },
     "vimwiki": {
       "rev": "72792615e739d0eb54a9c8f7e0a46a6e2407c9e8",
       "src": "https://github.com/vimwiki/vimwiki"

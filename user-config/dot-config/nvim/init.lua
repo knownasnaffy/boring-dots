@@ -187,6 +187,7 @@ vim.pack.add({
   'https://github.com/romgrk/barbar.nvim',
   'https://github.com/olimorris/persisted.nvim',
   'https://github.com/nvim-mini/mini.nvim',
+  'https://github.com/akinsho/toggleterm.nvim',
   'https://github.com/folke/snacks.nvim'
 })
 
@@ -542,3 +543,23 @@ map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>')
 map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>')
 map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>')
 map('n', '<A-0>', '<Cmd>BufferLast<CR>')
+
+require('toggleterm').setup({--[[ things you want to change go here]]
+    size = function(term)
+      if term.direction == 'horizontal' then
+        return 15
+      elseif term.direction == 'vertical' then
+        return vim.o.columns * 0.4
+      end
+    end,
+    terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
+    auto_scroll = true, -- automatically scroll to the bottom on terminal output
+    persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
+    -- on_open = function()
+    --   vim.cmd 'startinsert'
+    -- end, -- function to run when the terminal opens
+  })
+
+
+map('n', '<A-`>', ':ToggleTerm<CR>', { desc = 'Toggle terminal' })
+map('t', '<A-`>', '<Cmd>ToggleTerm<CR>', { desc = 'Hide terminal' })
