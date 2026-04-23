@@ -494,6 +494,7 @@ require('barbar').setup({
       custom_colors = false,
       enabled = true,
     },
+    separator_at_end = false,
   }
 })
 
