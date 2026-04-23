@@ -334,10 +334,6 @@ local function run_git(cmd, success_msg, opts)
   end)
 end
 
-map('n', '<leader>gs', MiniGit.show_at_cursor,
-  { desc = "Show git object at cursor" })
-map('n', '<leader>ge', '<Cmd>Git status<CR>', {desc = "Git status"})
-
 map('n', '<leader>gc', function()
   local data = MiniGit.get_buf_data(0)
 
@@ -391,23 +387,6 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 require('mini.pick').setup()
-map('n', '<leader>sf', MiniPick.builtin.files, {desc = "Search files"})
-map('n', '<leader>sg', MiniPick.builtin.grep_live, {desc = "Grep files live"})
-map('n', '<leader>sh', MiniPick.builtin.help, {desc = "Search help pages"})
-map('n', '<leader>sr', MiniPick.builtin.resume, {desc = "Resume latest picker"})
-map('n', '<leader>sd', MiniExtra.pickers.diagnostic,
-  { desc = "Search diagnostics" })
-map('n', '<leader>sc', MiniExtra.pickers.commands,
-  { desc = "Search commands" })
-map('n', '<leader>sb', MiniExtra.pickers.git_branches,
-  { desc = "Search git branches" })
-map('n', '<leader>sk', MiniExtra.pickers.keymaps, { desc = "Search keymaps" })
-map('n', '<leader>sq', function()
-    MiniExtra.pickers.list({scope='quickfix'})
-  end, { desc = "Search quickfix list" })
-map('n', '<leader>sm', MiniExtra.pickers.manpages, { desc = "Search manpages" })
-map('n', '<leader>so', MiniExtra.pickers.oldfiles,
-  { desc = "Search old files" })
 
 require('mini.cursorword').setup()
 
@@ -452,11 +431,11 @@ require('snacks').setup({
     preset = {
       keys = {
         { icon = " ", key = "f", desc = "Find File",
-          action = MiniPick.builtin.files },
+          action = Snacks.picker.files },
         { icon = " ", key = "g", desc = "Find Text",
-          action = MiniPick.builtin.grep_live },
+          action = Snacks.picker.grep },
         { icon = " ", key = "r", desc = "Recent Files",
-          action = MiniExtra.pickers.oldfiles },
+          action = Snacks.picker.recent },
         { icon = " ", key = "s", desc = "Restore Session",
           action = ":Persisted load" },
         { icon = " ", key = "q", desc = "Quit", action = ":qa" },
@@ -469,9 +448,120 @@ require('snacks').setup({
   gitbrowse = {
     what = "branch"
   },
+  picker = {
+        ui_select = true,
+        sources = {
+          files = {
+            hidden = true,
+          },
+          grep = {
+            hidden = true,
+          },
+        },
+        win = {
+          -- input window
+          input = {
+            keys = {
+              ['<M-q>'] = { 'cancel', mode = 'i' },
+              ['<M-Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
+              ['<M-S-Space>'] = { 'select_and_prev', mode = { 'i', 'n' } },
+              ['<M-a>'] = { 'select_all', mode = { 'i', 'n' } },
+              ['<M-w>'] = { '<c-s-w>', mode = { 'i' }, expr = true, desc = 'delete word' },
+              ['<M-j>'] = { 'list_down', mode = { 'i', 'n' } },
+              ['<M-k>'] = { 'list_up', mode = { 'i', 'n' } },
+              ['<M-h>'] = { 'toggle_hidden', mode = { 'i', 'n' } },
+              ['<M-i>'] = { 'toggle_ignored', mode = { 'i', 'n' } },
+              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
+              ['<M-b>'] = { 'preview_scroll_up', mode = { 'i', 'n' } },
+              ['<M-f>'] = { 'preview_scroll_down', mode = { 'i', 'n' } },
+              ['<M-S-k>'] = { 'list_scroll_down', mode = { 'i', 'n' } },
+              ['<M-S-l>'] = { 'list_scroll_up', mode = { 'i', 'n' } },
+              ['<M-s>'] = { 'edit_split', mode = { 'i', 'n' } },
+              ['<M-S-s>'] = { 'edit_vsplit', mode = { 'i', 'n' } },
+              ['<M-r><M-a>'] = { 'insert_cWORD', mode = 'i' },
+              ['<M-r><M-f>'] = { 'insert_file', mode = 'i' },
+              ['<M-r><M-l>'] = { 'insert_line', mode = 'i' },
+              ['<M-r><M-p>'] = { 'insert_file_full', mode = 'i' },
+            },
+            b = {
+              minipairs_disable = true,
+            },
+          },
+          -- preview window
+          preview = {
+            keys = {
+              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
+            },
+          },
+          -- result list window
+          list = {
+            keys = {
+              ['<M-q>'] = 'cancel',
+              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
+              ['<M-Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
+              ['<M-S-Space>'] = { 'select_and_prev', mode = { 'i', 'n' } },
+              ['<a-d>'] = 'inspect',
+              ['<M-h>'] = 'toggle_hidden',
+              ['<M-i>'] = 'toggle_ignored',
+              ['<M-a>'] = 'select_all',
+              ['<M-b>'] = { 'preview_scroll_up', mode = { 'i', 'n' } },
+              ['<M-f>'] = { 'preview_scroll_down', mode = { 'i', 'n' } },
+              ['<M-s>'] = { 'edit_split', mode = { 'i', 'n' } },
+              ['<M-S-s>'] = { 'edit_vsplit', mode = { 'i', 'n' } },
+            },
+            wo = {
+              conceallevel = 2,
+              concealcursor = 'nvc',
+            },
+          },
+        },
+      },
   quickfile = { enabled = true },
-  scope = {}
+  scope = {},
+  statuscolumn = {}
 })
+
+map('n', '<leader>sf', function() Snacks.picker.files() end, {desc = "Search files"})
+map('n', '<leader>sg', function() Snacks.picker.grep() end, {desc = "Grep files live"})
+map('n', '<leader>/', function() Snacks.picker.lines() end, {desc = "Fuzzy search lines"})
+map('n', '<leader>so', function() Snacks.picker.recent() end, { desc = "Search old files" })
+
+map('n', '<leader>sr', function() Snacks.picker.resume() end, {desc = "Resume latest picker"})
+map('n', '<leader>ss', function() Snacks.picker.pickers() end, { desc = "Search snacks pickers" })
+
+map('n', '<leader>sh', function() Snacks.picker.help() end, {desc = "Search help pages"})
+map('n', '<leader>sd', function() Snacks.picker.diagnostics() end,
+  { desc = "Search diagnostics" })
+map('n', '<leader>sk', function() Snacks.picker.keymaps() end, { desc = "Search keymaps" })
+map('n', '<leader>si', function() Snacks.picker.icons() end, { desc = "Search keymaps" })
+map('n', '<leader>sq', function()
+    MiniExtra.pickers.list({scope='quickfix'})
+end, { desc = "Search quickfix list" })
+map('n', '<leader>sm', function() Snacks.picker.man() end, { desc = "Search manpages" })
+
+map('n', '<leader>sN', function()
+  Snacks.picker.files { cwd = vim.fn.stdpath 'config' }
+end, { desc = "Search neovim files" })
+
+
+map('n', '<leader>gb', function()
+        Snacks.picker.git_branches {
+          all = true,
+          win = {
+            input = {
+              keys = {
+                ['<M-a>'] = { 'git_branch_add', mode = { 'n', 'i' } },
+                ['<M-S-d>'] = { 'git_branch_del', mode = { 'n', 'i' } },
+              },
+            },
+          },
+        }
+end, { desc = "Search git branches" })
+map('n', '<leader>ge', function() Snacks.picker.git_status() end, { desc = "Search manpages" })
+map('n', '<leader>gf', function() Snacks.picker.git_log_file() end, { desc = "Search manpages" })
+map('n', '<leader>gB', function() Snacks.gitbrowse() end,
+  { desc = 'Open current git remote in browser' })
+
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "MiniFilesActionRename",
@@ -479,9 +569,6 @@ vim.api.nvim_create_autocmd("User", {
     Snacks.rename.on_rename_file(event.data.from, event.data.to)
   end,
 })
-
-map('n', '<leader>gB', function() Snacks.gitbrowse() end,
-  { desc = 'Open current git remote in browser' })
 
 vim.g.barbar_auto_setup = false
 require('barbar').setup({
