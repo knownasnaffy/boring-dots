@@ -68,6 +68,9 @@ map('i', '<M-s>', '<Esc><Cmd>w<CR>a')
 map('n', '<M-s>', '<Cmd>w<CR>')
 map('n', '<M-r>', '<C-r>')
 
+map({'n', 'x'}, '<M-S-j>', '<Cmd>copy +0<CR>')
+map({'n', 'x'}, '<M-S-k>', '<Cmd>copy -1<CR>')
+
 map('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 map('n', 'g;', function()
@@ -491,6 +494,8 @@ require('barbar').setup({
 })
 
 vim.api.nvim_set_hl(0, "BufferCurrent", { link = "Normal" })
+vim.api.nvim_set_hl(0, "BufferCurrentSignRight",
+  { link = "Normal" })
 vim.api.nvim_set_hl(0, "BufferCurrentSign",
   { bg = "NvimDarkGrey2", fg = "NvimLightBlue" })
 
