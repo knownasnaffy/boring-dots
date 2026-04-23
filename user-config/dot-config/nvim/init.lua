@@ -59,6 +59,10 @@ vim.opt.iskeyword:remove '_'
 vim.cmd('filetype plugin on')
 vim.cmd('syntax on')
 
+vim.pack.add({"https://github.com/folke/tokyonight.nvim"})
+require('tokyonight').setup()
+vim.cmd.colorscheme("tokyonight-night")
+
 
 
 local map = vim.keymap.set
@@ -492,12 +496,6 @@ require('barbar').setup({
     },
   }
 })
-
-vim.api.nvim_set_hl(0, "BufferCurrent", { link = "Normal" })
-vim.api.nvim_set_hl(0, "BufferCurrentSignRight",
-  { link = "Normal" })
-vim.api.nvim_set_hl(0, "BufferCurrentSign",
-  { bg = "NvimDarkGrey2", fg = "NvimLightBlue" })
 
 vim.opt.sessionoptions:append 'globals'
 vim.api.nvim_create_autocmd({ 'User' }, {
