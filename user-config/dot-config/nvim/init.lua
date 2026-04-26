@@ -190,7 +190,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 vim.pack.add({
   'https://github.com/neovim/nvim-lspconfig',
-  -- 'https://github.com/nvim-treesitter/nvim-treesitter',
+  'https://github.com/nvim-treesitter/nvim-treesitter',
   'https://github.com/vimwiki/vimwiki',
   'https://github.com/NMAC427/guess-indent.nvim',
   'https://github.com/mason-org/mason.nvim',
@@ -198,12 +198,77 @@ vim.pack.add({
   'https://github.com/olimorris/persisted.nvim',
   'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/akinsho/toggleterm.nvim',
-  'https://github.com/iamcco/markdown-preview.nvim',
   'https://github.com/folke/snacks.nvim'
 })
 
+vim.api.nvim_create_autocmd('PackChanged', { callback = function(ev)
+  local name, kind = ev.data.spec.name, ev.data.kind
+  if name == 'nvim-treesitter' and kind == 'update' then
+    require('nvim-treesitter').update()
+  end
+end })
+
 vim.cmd.packadd("nvim.undotree")
 map('n', '<leader>u', '<Cmd>Undotree<CR>', { desc = 'Open Undo Tree' })
+
+local ts = require 'nvim-treesitter'
+local parsers = {
+    "bash",
+    "comment",
+    "css",
+    "diff",
+    "dockerfile",
+    "elixir",
+    "git_config",
+    "gitcommit",
+    "gitignore",
+    "html",
+    "http",
+    "javascript",
+    "json",
+    "json5",
+    "lua",
+    "make",
+    "markdown",
+    "markdown_inline",
+    "python",
+    "regex",
+    "rust",
+    "ssh_config",
+    "sql",
+    "toml",
+    "tsx",
+    "typescript",
+    "vim",
+    "vimdoc",
+    "yaml",
+}
+
+local isnt_installed = function(lang)
+  return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
+end
+local to_install = vim.tbl_filter(isnt_installed, parsers)
+if #to_install > 0 then require('nvim-treesitter').install(to_install) end
+
+-- Not every tree-sitter parser is the same as the file type detected
+-- So the patterns need to be registered more cleverly
+local patterns = {}
+for _, parser in ipairs(parsers) do
+    local parser_patterns = vim.treesitter.language.get_filetypes(parser)
+    for _, pp in pairs(parser_patterns) do
+        table.insert(patterns, pp)
+    end
+end
+
+vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.wo[0][0].foldmethod = 'expr'
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = patterns,
+    callback = function()
+        vim.treesitter.start()
+    end,
+})
 
 vim.cmd.packadd("vimwiki")
 map('n', '<leader>vi', '<Cmd>VimwikiIndex<CR>')
@@ -670,7 +735,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.laststatus = 0
   end,
 })
-
--- vim.cmd.packadd("markdown-preview")
-vim.fn["mkdp#util#install"]()
-map('n', '<leader>om', '<Cmd>MarkdownPreview<CR>', { desc = 'Open markdown preview' })
