@@ -72,8 +72,11 @@ map('i', '<M-s>', '<Esc><Cmd>w<CR>a')
 map('n', '<M-s>', '<Cmd>w<CR>')
 map('n', '<M-r>', '<C-r>')
 
-map({'n', 'x'}, '<M-S-j>', '<Cmd>copy +0<CR>')
-map({'n', 'x'}, '<M-S-k>', '<Cmd>copy -1<CR>')
+map('n', '<M-S-j>', '<Cmd>copy +0<CR>')
+map('n', '<M-S-k>', '<Cmd>copy -1<CR>')
+
+map('x', '<M-S-j>', ":copy '><CR>gv")
+map('x', '<M-S-k>', ":copy -1<CR>gv")
 
 map('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
