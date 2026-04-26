@@ -191,9 +191,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.pack.add({
   'https://github.com/neovim/nvim-lspconfig',
   'https://github.com/nvim-treesitter/nvim-treesitter',
+  'https://github.com/neovim/nvim-lspconfig',
   'https://github.com/vimwiki/vimwiki',
   'https://github.com/NMAC427/guess-indent.nvim',
   'https://github.com/mason-org/mason.nvim',
+  'https://github.com/mason-org/mason-lspconfig.nvim',
   'https://github.com/romgrk/barbar.nvim',
   'https://github.com/olimorris/persisted.nvim',
   'https://github.com/nvim-mini/mini.nvim',
@@ -270,6 +272,93 @@ vim.api.nvim_create_autocmd('FileType', {
     end,
 })
 
+vim.cmd.packadd("nvim-lspconfig")
+
+local servers = {
+  lua_ls = {},
+  vtsls = {},
+  tailwindcss = {}
+}
+
+require('mason').setup()
+map('n', '<leader>om', '<Cmd>Mason<CR>')
+
+ensure_installed = vim.tbl_keys(servers or {})
+require("mason-lspconfig").setup({
+  automatic_enable = false,
+  ensure_installed = ensure_installed
+})
+
+vim.lsp.enable(ensure_installed)
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(event)
+    local map = function(keys, func, desc, mode)
+      mode = mode or 'n'
+      vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+    end
+
+    map('gd', function() Snacks.picker.lsp_definitions() end, 'Goto Definition')
+
+    map('gr', function() Snacks.picker.lsp_references() end, 'Goto References')
+
+    map('gI', function() Snacks.picker.lsp_implementations() end, 'Goto Implementation')
+
+    map('<leader>D', function() Snacks.picker.lsp_type_definitions() end, 'Type Definition')
+
+    map('<leader>ds', function() Snacks.picker.lsp_symbols() end, 'Document Symbols')
+
+    map('<leader>ws', function() Snacks.picker.lsp_workspace_symbols() end, 'Workspace Symbols')
+
+    map('<leader>rn', vim.lsp.buf.rename, 'Rename')
+
+    map('<leader>ca', vim.lsp.buf.code_action, 'Code Action', { 'n', 'x' })
+
+    map('gD', function() Snacks.picker.lsp_declarations() end, 'Goto Declaration')
+
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client and client:supports_method('textDocument/documentHighlight', event.buf) then
+      local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+      vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+        buffer = event.buf,
+        group = highlight_augroup,
+        callback = vim.lsp.buf.document_highlight,
+      })
+
+      vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+        buffer = event.buf,
+        group = highlight_augroup,
+        callback = vim.lsp.buf.clear_references,
+      })
+
+      vim.api.nvim_create_autocmd('LspDetach', {
+        group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+        callback = function(event2)
+          vim.lsp.buf.clear_references()
+          vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+        end,
+      })
+    end
+
+    if client and client:supports_method('textDocument/inlayHint', event.buf) then
+      map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, 'Toggle Inlay Hints')
+    end
+  end
+})
+
+vim.diagnostic.config {
+  underline = { severity = vim.diagnostic.severity.ERROR },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = ' ',
+      [vim.diagnostic.severity.WARN] = ' ',
+      [vim.diagnostic.severity.INFO] = '󰋽 ',
+      [vim.diagnostic.severity.HINT] = '󰌶 ',
+    },
+  }
+}
+
+
 vim.cmd.packadd("vimwiki")
 map('n', '<leader>vi', '<Cmd>VimwikiIndex<CR>')
 map('n', '<leader>vg', '<Cmd>VimwikiGoto<CR>')
@@ -288,9 +377,6 @@ require('guess-indent').setup({
     ["shiftwidth"] = "detected",
   },
 })
-
-require('mason').setup()
-map('n', '<leader>om', '<Cmd>Mason<CR>')
 
 
 local miniextra = require('mini.extra')
@@ -356,7 +442,7 @@ require('mini.diff').setup({
     signs = { add = '▍', change = '▍', delete = '▍' },
   }
 })
-map('n', '<leader>th', MiniDiff.toggle_overlay, {
+map('n', '<leader>td', MiniDiff.toggle_overlay, {
   desc = "Toggle git hunk overlay"
 })
 local gh_apply = function() return MiniDiff.operator('apply') .. 'gh' end
@@ -504,11 +590,11 @@ require('snacks').setup({
     preset = {
       keys = {
         { icon = " ", key = "f", desc = "Find File",
-          action = Snacks.picker.files },
+          action = function() Snacks.picker.files() end },
         { icon = " ", key = "g", desc = "Find Text",
-          action = Snacks.picker.grep },
+          action = function() Snacks.picker.grep() end },
         { icon = " ", key = "r", desc = "Recent Files",
-          action = Snacks.picker.recent },
+          action = function() Snacks.picker.recent() end },
         { icon = " ", key = "s", desc = "Restore Session",
           action = ":Persisted load" },
         { icon = " ", key = "q", desc = "Quit", action = ":qa" },
