@@ -294,6 +294,11 @@ require('mini.diff').setup({
 map('n', '<leader>th', MiniDiff.toggle_overlay, {
   desc = "Toggle git hunk overlay"
 })
+local gh_apply = function() return MiniDiff.operator('apply') .. 'gh' end
+map('n', '<leader>gha', gh_apply, { expr = true, remap = true })
+local gh_reset = function() return MiniDiff.operator('reset') .. 'gh' end
+map('n', '<leader>ghr', gh_reset, { expr = true, remap = true })
+
 
 require('mini.files').setup({
   mappings = {
