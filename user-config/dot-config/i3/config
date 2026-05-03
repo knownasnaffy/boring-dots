@@ -166,7 +166,8 @@ bindsym $mod+Shift+r restart
 mode "orientation" {
         bindsym h split horizontal; mode "default"
         bindsym v split vertical; mode "default"
-        bindsym e layout toggle splith splitv tabbed
+        bindsym e layout toggle splith splitv
+        bindsym t layout tabbed; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
