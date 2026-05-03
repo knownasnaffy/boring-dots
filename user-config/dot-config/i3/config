@@ -141,6 +141,7 @@ bindsym $mod+Shift+r restart
 mode "folder" {
         bindsym s exec ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
         bindsym d exec ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
+        bindsym b exec ~/.local/bin/open_folder "$HOME/Downloads/Beeper"; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
