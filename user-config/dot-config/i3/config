@@ -114,7 +114,7 @@ bindsym $mod+c focus child
 bindsym $mod+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
 # read 1 character and go to the window with the character
-bindsym $mod+f exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
@@ -162,6 +162,16 @@ assign [class="Beeper"] 3
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
+
+mode "folder" {
+        bindsym s exec ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
+        bindsym d exec ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+f mode "folder"
 
 mode "orientation" {
         bindsym h split horizontal; mode "default"
