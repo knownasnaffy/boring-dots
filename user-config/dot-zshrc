@@ -33,7 +33,22 @@ source $ZSH/oh-my-zsh.sh
 
 PROMPT=$'
 %{$fg_bold[cyan]%}$(
-    if [[ $PWD == ~/code(|/*) ]]; then
+    local trusted_dirs=(
+        ~/code
+        ~/boring-dots
+        ~/notes
+    )
+
+    local trusted=false
+
+    for dir in $trusted_dirs; do
+        if [[ $PWD == ${dir}(|/*) ]]; then
+            trusted=true
+            break
+        fi
+    done
+
+    if $trusted; then
         local branch=$(git_current_branch)
 
         if [[ -n $branch ]]; then
