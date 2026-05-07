@@ -165,6 +165,13 @@ function y() {
     rm -f -- "$tmp"
 }
 
+rocket() {
+  local img
+  img=$(podman build -q .) || return 1
+  podman run --rm -it --network host "$img"
+  podman rmi "$img"
+}
+
 
 
 # Don't save commands starting with a space in history
