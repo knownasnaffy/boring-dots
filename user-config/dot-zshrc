@@ -119,7 +119,7 @@ bindkey '^[y' copy-buffer                            # Alt+y
 
 
 export EDITOR='nvim'
-export VISUAL="$TERMINAL -e nvim"
+export VISUAL="xfce4-terminal -e nvim"
 alias vi=nvim
 
 # Compilation flags
