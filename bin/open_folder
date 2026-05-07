@@ -7,4 +7,4 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 
-xfce4-terminal -e "$HOME/.local/bin/yazi $@"
+xfce4-terminal -e "ranger $@"
