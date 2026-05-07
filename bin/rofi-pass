@@ -1,0 +1,49 @@
+#!/bin/bash
+
+shopt -s nullglob globstar
+
+set -o nounset
+
+type_secret() {
+    local secret="$1"
+
+    sleep 0.2
+
+    xdotool type -- "$secret"
+}
+
+get_password() {
+    pass show "$1" | head -n1
+}
+
+get_otp() {
+    pass otp "$1" 2>/dev/null
+}
+
+prefix=${PASSWORD_STORE_DIR-~/.password-store}
+password_files=( "$prefix"/**/*.gpg )
+password_files=( "${password_files[@]#"$prefix"/}" )
+password_files=( "${password_files[@]%.gpg}" )
+
+password=$(printf '%s\n' "${password_files[@]}" | rofi \
+        -dmenu \
+        -no-custom \
+    "$@")
+
+case $? in
+    0)
+        [[ -n $password ]] || exit 0
+
+        otp=$(get_otp "$password")
+
+        if [[ -n "$otp" ]]; then
+            type_secret "$otp"
+            notify-send -a "password-manager" "OTP typed"
+        else
+            pw=$(get_password "$password")
+            type_secret "$pw"
+            notify-send -a "password-manager" "Password typed"
+        fi
+        ;;
+    # TODO: Copy or some functionality
+esac

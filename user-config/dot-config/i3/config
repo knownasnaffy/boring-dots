@@ -138,6 +138,18 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
+bindsym $mod+p exec ~/.local/bin/rofi-gpaste
+
+mode "open" {
+        bindsym p exec ~/.local/bin/rofi-pass; mode "default"
+        bindsym t exec ~/.local/bin/rofi-timer; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+o mode "open"
+
 mode "folder" {
         bindsym s exec ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
         bindsym d exec ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
@@ -149,7 +161,7 @@ mode "folder" {
 
 bindsym $mod+f mode "folder"
 
-mode "orientation" {
+mode "window" {
         bindsym h split horizontal; mode "default"
         bindsym v split vertical; mode "default"
         bindsym e layout toggle splith splitv
@@ -159,7 +171,7 @@ mode "orientation" {
         bindsym Escape mode "default"
 }
 
-bindsym $mod+o mode "orientation"
+bindsym $mod+w mode "window"
 
 mode "bye" {
         bindsym s exec systemctl poweroff; mode "default"

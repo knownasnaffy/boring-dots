@@ -1,0 +1,15 @@
+configuration {
+	kb-move-word-back: "Alt+b,Control+Left";
+	kb-move-word-forward: "Alt+f,Control+Right";
+	kb-remove-word-back: "Control+Alt+h,Control+BackSpace,Alt+w";
+	kb-remove-word-forward: "Control+Alt+d,Alt+d";
+	kb-mode-next: "Shift+Right,Control+Tab,Alt+l";
+	kb-mode-previous: "Shift+Left,Control+ISO_Left_Tab,Alt+h";
+	kb-row-down: "Down,Control+n,Alt+j";
+	kb-row-up: "Up,Control+p,Alt+k";
+	kb-row-select: "Control+space,Alt+space";
+	kb-screenshot: "Alt+S";
+	kb-ellipsize: "Alt+period";
+	kb-toggle-sort: "Alt+grave";
+	kb-cancel: "Escape,Control+g,Control+bracketleft,Alt+q";
+}
