@@ -5,20 +5,32 @@ import time
 import sys
 import os
 from PIL import Image
-from Xlib import X, display
+from Xlib import X, XK, display
+from Xlib.ext import xtest
 import threading
 
 # --- config ---
-WALLPAPER_CMD = ["feh", "--bg-fill", os.path.expanduser("~/Pictures/wallpaper.jpg")]
+
+WALLPAPER_CMD = [
+    "feh",
+    "--bg-fill",
+    os.path.expanduser("~/Pictures/wallpaper.png")
+]
 
 TMP = f"/tmp/shot_{int(time.time() * 1000)}.png"
+
 OUT_DIR = os.path.expanduser("~/Pictures/Screenshots")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 timestamp = time.strftime("%Y%m%d-%H%M%S")
 OUT = os.path.join(OUT_DIR, f"Screenshot-{timestamp}.png")
 
-# --- overlay (runs in thread) ---
+NORMAL_STEP = 25
+LARGE_STEP = 100
+SMALL_STEP = 5
+
+# --- overlay thread ---
+
 def run_crosshair(stop_flag):
     d = display.Display()
     s = d.screen()
@@ -54,90 +66,199 @@ def run_crosshair(stop_flag):
             x = pointer.root_x
             y = pointer.root_y
 
-            # clear previous frame
             win.clear_area()
 
-            # --- horizontal ---
-            # thick black base
+            # horizontal
             win.poly_line(gc_black, X.CoordModeOrigin, [
                 (0, y), (s.width_in_pixels, y)
             ])
 
-            # thin white center
             win.poly_line(gc_white, X.CoordModeOrigin, [
                 (0, y), (s.width_in_pixels, y)
             ])
 
-            # --- vertical ---
-            # thick black base
+            # vertical
             win.poly_line(gc_black, X.CoordModeOrigin, [
                 (x, 0), (x, s.height_in_pixels)
             ])
 
-            # thin white center
             win.poly_line(gc_white, X.CoordModeOrigin, [
                 (x, 0), (x, s.height_in_pixels)
             ])
 
             d.sync()
             time.sleep(0.01)
+
     finally:
         win.unmap()
         d.close()
 
+# --- keyboard controller thread ---
+
+def keyboard_controller(stop_flag):
+    d = display.Display()
+    root = d.screen().root
+
+    root.grab_keyboard(
+        True,
+        X.GrabModeAsync,
+        X.GrabModeAsync,
+        X.CurrentTime
+    )
+
+    dragging = False
+
+    while not stop_flag["stop"]:
+        event = d.next_event()
+
+        if event.type != X.KeyPress:
+            continue
+
+        keysym = d.keycode_to_keysym(event.detail, 0)
+
+        state = event.state
+
+        shift = bool(state & X.ShiftMask)
+        alt = bool(state & X.Mod1Mask)
+
+        if shift:
+            step = LARGE_STEP
+        elif alt:
+            step = SMALL_STEP
+        else:
+            step = NORMAL_STEP
+
+        pointer = root.query_pointer()
+
+        x = pointer.root_x
+        y = pointer.root_y
+
+        # movement
+
+        if keysym == XK.XK_h:
+            x -= step
+
+        elif keysym == XK.XK_l:
+            x += step
+
+        elif keysym == XK.XK_k:
+            y -= step
+
+        elif keysym == XK.XK_j:
+            y += step
+
+        # clamp
+
+        screen = d.screen()
+
+        x = max(0, min(screen.width_in_pixels - 1, x))
+        y = max(0, min(screen.height_in_pixels - 1, y))
+
+        root.warp_pointer(x, y)
+        d.sync()
+
+        # start drag
+
+        if keysym == XK.XK_v and not dragging:
+            xtest.fake_input(d, X.ButtonPress, 1)
+            d.sync()
+            dragging = True
+
+        # finish drag
+
+        elif keysym == XK.XK_Return and dragging:
+            xtest.fake_input(d, X.ButtonRelease, 1)
+            d.sync()
+            break
+
+        # cancel
+
+        elif keysym == XK.XK_Escape:
+            if dragging:
+                xtest.fake_input(d, X.ButtonRelease, 1)
+                d.sync()
+
+            stop_flag["cancel"] = True
+            break
+
+    stop_flag["stop"] = True
+
 # --- main flow ---
 
-# 1. capture screen
+# capture screen
 subprocess.run(["maim", TMP], check=True)
 
-# 2. set screenshot as background
+# freeze frame wallpaper
 subprocess.run(["feh", "--bg-fill", TMP], check=True)
 
-# 3. start overlay thread
-stop_flag = {"stop": False}
-t = threading.Thread(target=run_crosshair, args=(stop_flag,))
-t.start()
+stop_flag = {
+    "stop": False,
+    "cancel": False
+}
 
-time.sleep(0.30)
+# overlay thread
+overlay_thread = threading.Thread(
+    target=run_crosshair,
+    args=(stop_flag,)
+)
 
-# 4. run slop
+overlay_thread.start()
+
+# keyboard thread
+keyboard_thread = threading.Thread(
+    target=keyboard_controller,
+    args=(stop_flag,)
+)
+
+keyboard_thread.start()
+
+time.sleep(0.2)
+
+# run slop
 result = subprocess.run(
-    ["slop", "-f", "%x,%y %w,%h"],
+    ["slop", "-k", "-f", "%x,%y %w,%h"],
     capture_output=True,
     text=True
 )
 
 geom = result.stdout.strip()
 
-# 5. stop overlay
+# cleanup threads
 stop_flag["stop"] = True
-t.join()
 
-# 6. restore wallpaper
+overlay_thread.join()
+keyboard_thread.join()
+
+# restore wallpaper
 subprocess.run(WALLPAPER_CMD)
 
-# 7. handle cancel
-if not geom:
+# cleanup cancel
+if stop_flag["cancel"] or not geom:
     print("Selection cancelled")
-    os.remove(TMP)
+
+    if os.path.exists(TMP):
+        os.remove(TMP)
+
     sys.exit(1)
 
-# 8. parse geometry
+# parse geometry
 pos, size = geom.split()
+
 x, y = map(int, pos.split(","))
 w, h = map(int, size.split(","))
 
 if w <= 0 or h <= 0:
     print("Invalid selection")
+
     os.remove(TMP)
     sys.exit(1)
 
-# 9. crop original screenshot
+# crop original screenshot
 with Image.open(TMP) as img:
     cropped = img.crop((x, y, x + w, y + h))
     cropped.save(OUT)
 
-# 10. cleanup
+# cleanup
 os.remove(TMP)
 
 print("Saved:", OUT)
