@@ -90,6 +90,12 @@ def run_crosshair(stop_flag):
             time.sleep(0.01)
 
     finally:
+        try:
+            d.ungrab_keyboard(X.CurrentTime)
+            d.sync()
+        except:
+            pass
+
         win.unmap()
         d.close()
 
@@ -173,7 +179,7 @@ def keyboard_controller(stop_flag):
 
         # cancel
 
-        elif keysym == XK.XK_Escape:
+        elif keysym in (XK.XK_Escape, XK.XK_q):
             if dragging:
                 xtest.fake_input(d, X.ButtonRelease, 1)
                 d.sync()
@@ -242,10 +248,17 @@ if stop_flag["cancel"] or not geom:
     sys.exit(1)
 
 # parse geometry
-pos, size = geom.split()
+try:
+    pos, size = geom.split()
 
-x, y = map(int, pos.split(","))
-w, h = map(int, size.split(","))
+    x, y = map(int, pos.split(","))
+    w, h = map(int, size.split(","))
+
+except Exception:
+    print("Failed to parse slop geometry")
+
+    os.remove(TMP)
+    sys.exit(1)
 
 if w <= 0 or h <= 0:
     print("Invalid selection")
