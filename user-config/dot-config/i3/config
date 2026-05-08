@@ -138,11 +138,11 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
-bindsym $mod+p exec ~/.local/bin/rofi-gpaste
+bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-gpaste
 
 mode "open" {
-        bindsym p exec ~/.local/bin/rofi-pass; mode "default"
-        bindsym t exec rofi -show timer -modi timer:$HOME/.local/bin/rofi-timer; mode "default"
+        bindsym p exec --no-startup-id ~/.local/bin/rofi-pass; mode "default"
+        bindsym t exec --no-startup-id rofi -show timer -modi timer:$HOME/.local/bin/rofi-timer; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
@@ -151,9 +151,9 @@ mode "open" {
 bindsym $mod+o mode "open"
 
 mode "folder" {
-        bindsym s exec ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
-        bindsym d exec ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
-        bindsym b exec ~/.local/bin/open_folder "$HOME/Downloads/Beeper"; mode "default"
+        bindsym s exec --no-startup-id ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
+        bindsym d exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
+        bindsym b exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads/Beeper"; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
@@ -177,7 +177,7 @@ mode "bye" {
         bindsym s exec systemctl poweroff; mode "default"
         bindsym r exec systemctl reboot; mode "default"
         bindsym e exec i3-msg exit; mode "default"
-        bindsym l exec i3lock -c 333333; mode "default"
+        bindsym l exec --no-startup-id i3lock -c 333333; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
@@ -186,9 +186,9 @@ mode "bye" {
 bindsym $mod+b mode "bye"
 
 mode "screenshot" {
-        bindsym s exec ~/.local/bin/screenshot --screen; mode "default"
-        bindsym w exec ~/.local/bin/screenshot --window; mode "default"
-        bindsym a exec ~/.local/bin/caparea; mode "default"
+        bindsym s exec --no-startup-id ~/.local/bin/screenshot --screen; mode "default"
+        bindsym w exec --no-startup-id ~/.local/bin/screenshot --window; mode "default"
+        bindsym a exec --no-startup-id ~/.local/bin/caparea; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
