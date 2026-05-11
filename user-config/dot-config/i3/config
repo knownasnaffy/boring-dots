@@ -134,6 +134,11 @@ force_display_urgency_hint 1500 ms
 assign [class="qutebrowser"] 2
 assign [class="Beeper"] 3
 
+assign [class="spotube"] 4
+assign [class="Spotube"] 4
+
+assign [class="jetbrains-studio"] 9
+
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
