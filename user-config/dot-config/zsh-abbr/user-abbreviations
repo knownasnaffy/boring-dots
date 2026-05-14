@@ -1,6 +1,7 @@
 abbr "b"="buku --suggest"
 abbr "bpd"="podman run -it --rm --network host -v \$(pwd):/app:Z -v bun_cache:/root/.bun -w /app oven/bun:latest"
 abbr "dnf install"="sudo dnf install"
+abbr "dp"="podman run -it --rm fedora-toolbox:42 bash"
 abbr "ff"="fastfetch"
 abbr "g"="git"
 abbr "gcom"="git checkout main"
