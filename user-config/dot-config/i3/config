@@ -159,9 +159,12 @@ mode "open" {
 bindsym $mod+o mode "open"
 
 mode "folder" {
+        bindsym p exec --no-startup-id ~/.local/bin/open_folder "$HOME/Pictures"; mode "default"
         bindsym s exec --no-startup-id ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
         bindsym d exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
         bindsym b exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads/Beeper"; mode "default"
+        bindsym o exec --no-startup-id ~/.local/bin/open_folder "$HOME/Documents"; mode "default"
+        bindsym v exec --no-startup-id ~/.local/bin/open_folder "$HOME/Videos"; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
