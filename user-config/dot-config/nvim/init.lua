@@ -1,823 +1,126 @@
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+-- WARNING: NEOVIM 0.13 IS STILL UNDER DEVELOPMENT AND NOT YET STABLE.
+-- BE SURE YOU ARE COMFORTABLE WITH KEEPING UP TO DATE DEVELOPMENT VERSION.
+-- THIS CONFIG IS VERIFIED FOR AT LEAST VERSION `v0.13.0-dev-29+g1bcf2d7f90`.
+-- WHEN IN DOUBT - UPDATE TO THE LATEST DEVELOPMENT VERSION.
 
-vim.g.have_nerd_font = true
+-- ┌────────────────────┐
+-- │ Welcome to MiniMax │
+-- └────────────────────┘
+--
+-- This is a config designed to mostly use MINI. It provides out of the box
+-- a stable, polished, and feature rich Neovim experience. Its structure:
+--
+-- ├ init.lua          Initial (this) file executed during startup
+-- ├ plugin/           Files automatically sourced during startup
+-- ├── 10_options.lua  Built-in Neovim behavior
+-- ├── 20_keymaps.lua  Custom mappings
+-- ├── 30_mini.lua     MINI configuration
+-- ├── 40_plugins.lua  Plugins outside of MINI
+-- ├ snippets/         User defined snippets (has demo file)
+-- ├ after/            Files to override behavior added by plugins
+-- ├── ftplugin/       Files for filetype behavior (has demo file)
+-- ├── lsp/            Language server configurations (has demo file)
+-- ├── snippets/       Higher priority snippet files (has demo file)
+--
+-- Config files are meant to be read, preferably inside a Neovim instance running
+-- this config and opened at its root. This will help you better understand your
+-- setup. Start with this file. Any order is possible, prefer the one listed above.
+-- Ways of navigating your config:
+-- - `<Space>` + `e` + (one of) `iokmp` - edit 'init.lua' or 'plugin/' files.
+-- - Inside config directory: `<Space>ff` (picker) or `<Space>ed` (explorer)
+-- - Navigate existing buffers with `[b`, `]b`, or `<Space>fb`.
+--
+-- Config files are also meant to be customized. Initially it is a baseline of
+-- a working config based on MINI. Modify it to make it yours. Some approaches:
+-- - Modify already existing files in a way that keeps them consistent.
+-- - Add new files in a way that keeps config consistent.
+--   Usually inside 'plugin/' or 'after/'.
+--
+-- Documentation comments like this can be found throughout the config.
+-- Common conventions:
+--
+-- - See `:h key-notation` for key notation used.
+-- - `:h xxx` means "documentation of helptag xxx". Either type text directly
+--   followed by Enter or type `<Space>fh` to open a helptag fuzzy picker.
+-- - "Type `<Space>fh`" means "press <Space>, followed by f, followed by h".
+--   Unless said otherwise, it assumes that Normal mode is current.
+-- - "See 'path/to/file'" means see open file at described path and read it.
+-- - `:SomeCommand ...` or `:lua ...` means execute mentioned command.
 
-vim.o.number = true
-vim.o.relativenumber = true
+-- ┌────────────────┐
+-- │ Plugin manager │
+-- └────────────────┘
+--
+-- This config uses `vim.pack` - built-in plugin manager. Its main entry
+-- point is a `vim.pack.add()` function, which acts like a "smarter `:packadd`":
+-- load plugin after making sure it is installed from source. The state of
+-- installed plugins is recorded in the lockfile named 'nvim-pack-lock.json'.
+-- Example usage:
+-- - `vim.pack.add({ ... })` - use inside config to add one or more plugins.
+-- - `:lua vim.pack.update()` - update all plugins; execute `:write` to confirm.
+-- - `:lua vim.pack.del({ ... })` - delete specific plugins.
+--
+-- See also:
+-- - `:h vim.pack-examples` - how to use it
+-- - `:h vim.pack-lockfile` - lockfile info
+-- - `:h vim.pack-events` - available events and plugin hooks examples
+-- - `:h vim.pack.update()` - more details about confirmation step
 
--- Mostly disable mouse
-vim.o.mouse = 'r'
+-- Define config table to be able to pass data between scripts
+-- It is a global variable which can be use both as `_G.Config` and `Config`
+_G.Config = {}
 
-vim.o.termguicolors = true
+-- 'mini.nvim' - all-in-one plugin powering most MiniMax features.
+-- See 'plugin/30_mini.lua' for how it is used.
+-- Load now to have 'mini.misc' available for custom loading helpers.
+vim.pack.add({ 'https://github.com/nvim-mini/mini.nvim' })
 
--- Sync system clipboard
-vim.o.clipboard = "unnamedplus"
+-- Loading helpers used to organize config into fail-safe parts. Example usage:
+-- - `now` - execute immediately. Use for what must be executed during startup.
+--   Like colorscheme, statusline, tabline, dashboard, etc.
+-- - `later` - execute a bit later. Use for things not needed during startup.
+-- - `now_if_args` - use only if needed during startup when Neovim is started
+--   like `nvim -- path/to/file`, but otherwise delaying is fine.
+-- - Others are better used only if the above is not enough for good performance.
+--   Use only if you are comfortable with adding complexity to your config:
+--   - `on_event` - execute once on a first matched event. Like "delay until
+--     first Insert mode enter": `on_event('InsertEnter', function() ... end)`.
+--   - `on_filetype` - execute once on a first matched filetype. Like "delay
+--     until first Lua file": `on_filetype('lua', function() ... end)`.
+--
+-- See also:
+-- - `:h MiniMisc.safely()`
+-- - 'plugin/30_mini.lua' and 'plugin/40_plugins.lua'
+local misc = require('mini.misc')
+Config.now = function(f) misc.safely('now', f) end
+Config.later = function(f) misc.safely('later', f) end
+Config.now_if_args = vim.fn.argc(-1) > 0 and Config.now or Config.later
+Config.on_event = function(ev, f) misc.safely('event:' .. ev, f) end
+Config.on_filetype = function(ft, f) misc.safely('filetype:' .. ft, f) end
 
-vim.o.linebreak = true
-vim.o.breakindent = true
-
-vim.o.undofile = true
-
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
-vim.o.signcolumn = 'yes'
-
-vim.opt.colorcolumn = "81"
-
--- Time before writing to swapfile after you stop typing
-vim.o.updatetime = 250
--- Time before map sequence is considered to have ended
-vim.o.timeoutlen = 300
-
-vim.o.splitright = true
-vim.o.splitbelow = true
-
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
--- Substitution live preview window command
-vim.o.inccommand = 'split'
-
-vim.o.cursorline = true
-vim.o.scrolloff = 10
-
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 2
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-
--- if performing an operation that would fail due to unsaved changes in the
--- buffer (like `:q`), instead raise a dialog asking if you wish to save the
--- current file(s)
-vim.o.confirm = true
-
-vim.opt.iskeyword:remove '-'
-vim.opt.iskeyword:remove '_'
-
-vim.cmd('filetype plugin on')
-vim.cmd('syntax on')
-
-vim.pack.add({"https://github.com/folke/tokyonight.nvim"})
-require('tokyonight').setup()
-vim.cmd.colorscheme("tokyonight-night")
-
-
-
-local map = vim.keymap.set
-
-map('i', '<M-q>', '<Esc>')
-map('i', '<M-s>', '<Esc><Cmd>w<CR>a')
-map('n', '<M-s>', '<Cmd>w<CR>')
-map('n', '<M-r>', '<C-r>')
-
-map('n', '<M-S-j>', '<Cmd>copy +0<CR>')
-map('n', '<M-S-k>', '<Cmd>copy -1<CR>')
-
-map('x', '<M-S-j>', ":copy '><CR>gv")
-map('x', '<M-S-k>', ":copy -1<CR>gv")
-
-map('n', '<Esc>', '<cmd>nohlsearch<CR>')
-
-map('n', 'g;', function()
-  local url = vim.fn.expand '<cfile>'
-  if url ~= '' then vim.fn.jobstart({ 'xdg-open', url }, { detach = true }) end
-end, { desc = 'Open stuff under cursor' })
-
-map('t', '<M-q>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
-
-map({ 'n', 'x' }, 'J', '<C-d>')
-map({ 'n', 'x' }, 'K', '<C-u>')
-
-map({ 'n', 'x' }, '<M-d>', '<C-d>')
-map({ 'n', 'x' }, '<M-f>', '<C-f>')
-map({ 'n', 'x' }, '<M-u>', '<C-u>')
-map({ 'n', 'x' }, '<M-b>', '<C-b>')
-
-
-map({ 'n', 'x' }, '<leader>h', '^', {
-  desc = 'Move to the first non-blank character in the line'
-})
-map({ 'n', 'x' }, '<leader>l', '$', {
-  desc = 'Move to the last character in the line'
-})
-map('n', '0', 'g0', { desc = 'Move to beginning of display line' })
-map('n', '$', 'g$', { desc = 'Move to end of display line' })
-
-map({ 'n', 'x', 'o' }, 'j', 'gj', { desc = 'Move down by display line' })
-map({ 'n', 'x', 'o' }, 'k', 'gk', { desc = 'Move up by display line' })
-
-map({ 'n', 'x' }, 'gj', 'J', { desc = 'Join line' })
-map({ 'n', 'x' }, 'gk', 'K', { desc = 'Look up keyword definition' })
-
-map({ 'n', 'x', 'i' }, '<A-n>', '<C-n>', { desc = 'Next item' })
-map({ 'n', 'x', 'i' }, '<A-p>', '<C-p>', { desc = 'Previous item' })
-
-map({ 'c', 'i' }, '<A-w>', '<C-w>', { desc = 'Delete word backward' })
-map({ 'c', 'i' }, '<A-d>', '<C-Del>', { desc = 'Delete word forward' })
-
-map({ 'n' }, '<A-o>', '<C-o>')
-map({ 'n' }, '<A-i>', '<C-i>')
-
-local function wcmd(cmd)
-  return function ()
-    vim.cmd.wincmd(cmd)
-  end
+-- Define custom autocommand group and helper to create an autocommand.
+-- Autocommands are Neovim's way to define actions that are executed on events
+-- (like creating a buffer, setting an option, etc.).
+--
+-- See also:
+-- - `:h autocommand`
+-- - `:h nvim_create_augroup()`
+-- - `:h nvim_create_autocmd()`
+local gr = vim.api.nvim_create_augroup('custom-config', {})
+Config.new_autocmd = function(event, pattern, callback, desc)
+  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
+  vim.api.nvim_create_autocmd(event, opts)
 end
 
-local function move_or_exec(dir, cmd)
-  return function()
-    local current = vim.fn.winnr()
-    local target = vim.fn.winnr(dir)
-
-    if target == current then
-      -- no window in that direction
-      vim.fn.jobstart(cmd, { detach = true })
-    else
-      vim.cmd.wincmd(dir)
-    end
+-- Define custom `vim.pack.add()` hook helper. Plugin data is passed as
+-- argument to the callback. See `:h vim.pack-events`.
+-- Example usage: see 'plugin/40_plugins.lua'.
+Config.on_packchanged = function(plugin_name, kinds, callback, desc)
+  local f = function(ev)
+    local name, kind = ev.data.spec.name, ev.data.kind
+    if not (name == plugin_name and vim.tbl_contains(kinds, kind)) then return end
+    if not ev.data.active then vim.cmd.packadd(plugin_name) end
+    callback(ev.data)
   end
+  Config.new_autocmd('PackChanged', '*', f, desc)
 end
-
-map('n', '<leader>wh', move_or_exec( "h", "i3-msg focus left"),
-  { desc = 'Move focus to the left window' })
-map('n', '<leader>wl', move_or_exec( "l", "i3-msg focus right"),
-  { desc = 'Move focus to the right window' })
-map('n', '<leader>wj', move_or_exec( "j", "i3-msg focus down"),
-  { desc = 'Move focus to the lower window' })
-map('n', '<leader>wk', move_or_exec( "k", "i3-msg focus up"),
-  { desc = 'Move focus to the upper window' })
-map('n', '<leader>ww', '<C-w>w', { desc = 'Switch window' })
-map('n', '<leader>wW', wcmd("W"), { desc = 'Switch window' })
-
-map('n', '<leader>w+', wcmd("+"), { desc = 'Increase window height' })
-map('n', '<leader>w-', wcmd('-'), { desc = 'Decrease window height' })
-map('n', '<leader>w>', wcmd('>'), { desc = 'Increase window width' })
-map('n', '<leader>w<', wcmd('<'), { desc = 'Decrease window width' })
-
-map('n', '<leader>ws', wcmd('s'), { desc = 'Split window horizontally' })
-map('n', '<leader>wv', wcmd('v'), { desc = 'Split window vertically' })
-map('n', '<leader>wm', wcmd('_'), { desc = 'Maximize window' })
-map('n', '<leader>wr', wcmd('='), { desc = 'Reset window sizes' })
-
-map('n', '<leader>wH', wcmd('H'), { desc = 'Move current window to the left' })
-map('n', '<leader>wL', wcmd('L'), { desc = 'Move current window to the right' })
-map('n', '<leader>wJ', wcmd('J'),
-  { desc = 'Move current window to the bottom' })
-map('n', '<leader>wK', wcmd('K'), { desc = 'Move current window to the top' })
-
-map('n', '<leader>wq', wcmd('q'), { desc = 'Close current window' })
-map('n', '<leader>woq', wcmd('o'), { desc = 'Close other windows' })
-map('n', '<leader>waq', '<Cmd>qa<CR>', { desc = 'Close all windows' })
-
-map('n', '<leader>wtn', '<Cmd>tabnew<CR>', { desc = 'New tab' })
-map('n', '<leader>wtc', '<Cmd>tabclose<CR>', { desc = 'Close tab' })
-map('n', '<leader>wth', '<Cmd>tabn<CR>', { desc = 'Previous tab' })
-map('n', '<leader>wtl', '<Cmd>tabN<CR>', { desc = 'Next tab' })
-
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
-  callback = function() vim.hl.on_yank({timeout=200}) end,
-})
-
-
-
-vim.pack.add({
-  'https://github.com/neovim/nvim-lspconfig',
-  'https://github.com/nvim-treesitter/nvim-treesitter',
-  'https://github.com/neovim/nvim-lspconfig',
-  'https://github.com/vimwiki/vimwiki',
-  'https://github.com/NMAC427/guess-indent.nvim',
-  'https://github.com/mason-org/mason.nvim',
-  'https://github.com/mason-org/mason-lspconfig.nvim',
-  'https://github.com/romgrk/barbar.nvim',
-  'https://github.com/olimorris/persisted.nvim',
-  'https://github.com/nvim-mini/mini.nvim',
-  'https://github.com/akinsho/toggleterm.nvim',
-  'https://github.com/folke/snacks.nvim'
-})
-
-vim.api.nvim_create_autocmd('PackChanged', { callback = function(ev)
-  local name, kind = ev.data.spec.name, ev.data.kind
-  if name == 'nvim-treesitter' and kind == 'update' then
-    require('nvim-treesitter').update()
-  end
-end })
-
-vim.cmd.packadd("nvim.undotree")
-map('n', '<leader>u', '<Cmd>Undotree<CR>', { desc = 'Open Undo Tree' })
-
-local ts = require 'nvim-treesitter'
-local parsers = {
-    "bash",
-    "comment",
-    "css",
-    "diff",
-    "dockerfile",
-    "elixir",
-    "git_config",
-    "gitcommit",
-    "gitignore",
-    "html",
-    "http",
-    "javascript",
-    "json",
-    "json5",
-    "lua",
-    "make",
-    "markdown",
-    "markdown_inline",
-    "python",
-    "regex",
-    "rust",
-    "ssh_config",
-    "sql",
-    "toml",
-    "tsx",
-    "typescript",
-    "vim",
-    "vimdoc",
-    "yaml",
-}
-
-local isnt_installed = function(lang)
-  return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
-end
-local to_install = vim.tbl_filter(isnt_installed, parsers)
-if #to_install > 0 then require('nvim-treesitter').install(to_install) end
-
--- Not every tree-sitter parser is the same as the file type detected
--- So the patterns need to be registered more cleverly
-local patterns = {}
-for _, parser in ipairs(parsers) do
-    local parser_patterns = vim.treesitter.language.get_filetypes(parser)
-    for _, pp in pairs(parser_patterns) do
-        table.insert(patterns, pp)
-    end
-end
-
-vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-vim.wo[0][0].foldmethod = 'expr'
-
-vim.api.nvim_create_autocmd('FileType', {
-    pattern = patterns,
-    callback = function()
-        vim.treesitter.start()
-    end,
-})
-
-vim.cmd.packadd("nvim-lspconfig")
-
-local servers = {
-  lua_ls = {},
-  vtsls = {},
-  tailwindcss = {}
-}
-
-require('mason').setup()
-map('n', '<leader>om', '<Cmd>Mason<CR>')
-
-ensure_installed = vim.tbl_keys(servers or {})
-require("mason-lspconfig").setup({
-  automatic_enable = false,
-  ensure_installed = ensure_installed
-})
-
-vim.lsp.enable(ensure_installed)
-
-vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(event)
-    local map = function(keys, func, desc, mode)
-      mode = mode or 'n'
-      vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-    end
-
-    map('gd', function() Snacks.picker.lsp_definitions() end, 'Goto Definition')
-
-    map('gr', function() Snacks.picker.lsp_references() end, 'Goto References')
-
-    map('gI', function() Snacks.picker.lsp_implementations() end, 'Goto Implementation')
-
-    map('<leader>D', function() Snacks.picker.lsp_type_definitions() end, 'Type Definition')
-
-    map('<leader>ds', function() Snacks.picker.lsp_symbols() end, 'Document Symbols')
-
-    map('<leader>ws', function() Snacks.picker.lsp_workspace_symbols() end, 'Workspace Symbols')
-
-    map('<leader>rn', vim.lsp.buf.rename, 'Rename')
-
-    map('<leader>ca', vim.lsp.buf.code_action, 'Code Action', { 'n', 'x' })
-
-    map('gD', function() Snacks.picker.lsp_declarations() end, 'Goto Declaration')
-
-    local client = vim.lsp.get_client_by_id(event.data.client_id)
-    if client and client:supports_method('textDocument/documentHighlight', event.buf) then
-      local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-      vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-        buffer = event.buf,
-        group = highlight_augroup,
-        callback = vim.lsp.buf.document_highlight,
-      })
-
-      vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-        buffer = event.buf,
-        group = highlight_augroup,
-        callback = vim.lsp.buf.clear_references,
-      })
-
-      vim.api.nvim_create_autocmd('LspDetach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-        callback = function(event2)
-          vim.lsp.buf.clear_references()
-          vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-        end,
-      })
-    end
-
-    if client and client:supports_method('textDocument/inlayHint', event.buf) then
-      map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, 'Toggle Inlay Hints')
-    end
-  end
-})
-
-vim.diagnostic.config {
-  underline = { severity = vim.diagnostic.severity.ERROR },
-  signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = ' ',
-      [vim.diagnostic.severity.WARN] = ' ',
-      [vim.diagnostic.severity.INFO] = '󰋽 ',
-      [vim.diagnostic.severity.HINT] = '󰌶 ',
-    },
-  }
-}
-
-
-vim.cmd.packadd("vimwiki")
-map('n', '<leader>vi', '<Cmd>VimwikiIndex<CR>')
-map('n', '<leader>vg', '<Cmd>VimwikiGoto<CR>')
-map('n', '<leader>vs', ':VimwikiSearch ')
-map('n', '<leader>vb', '<Cmd>VimwikiBacklinks<CR>')
-map('n', '<leader>vtt', '<Cmd>VimwikiToggleListItem<CR>')
-map('n', '<leader>vdi', '<Cmd>VimwikiDiaryIndex<CR>')
-map('n', '<leader>vdt', '<Cmd>VimwikiMakeDiaryNote<CR>')
-map('n', '<leader>vdy', '<Cmd>VimwikiMakeYesterdayDiaryNote<CR>')
-
-require('guess-indent').setup({
-  on_space_options = {
-    ["expandtab"] = true,
-    ["tabstop"] = "detected",
-    ["softtabstop"] = "detected",
-    ["shiftwidth"] = "detected",
-  },
-})
-
-
-local miniextra = require('mini.extra')
-miniextra.setup()
-local gen_ai_spec = miniextra.gen_ai_spec
-
-require('mini.ai').setup({
-  custom_textobjects = {
-    B = gen_ai_spec.buffer(),
-    D = gen_ai_spec.diagnostic(),
-    I = gen_ai_spec.indent(),
-    L = gen_ai_spec.line(),
-    N = gen_ai_spec.number(),
-  },
-})
-
-require('mini.comment').setup()
-require('mini.move').setup()
-require('mini.pairs').setup()
-require('mini.surround').setup()
-
-require('mini.bracketed').setup()
-
-local miniclue = require('mini.clue')
-miniclue.setup({
-  triggers = {
-    { mode = { 'n', 'x' }, keys = '<Leader>' },
-
-    { mode = 'n', keys = '[' },
-    { mode = 'n', keys = ']' },
-
-    -- Built-in completion
-    { mode = 'i', keys = '<C-x>' },
-
-    { mode = { 'n', 'x' }, keys = 'g' },
-
-    { mode = { 'n', 'x' }, keys = "'" },
-    { mode = { 'n', 'x' }, keys = '`' },
-
-    -- Registers
-    { mode = { 'n', 'x' }, keys = '"' },
-    { mode = { 'i', 'c' }, keys = '<C-r>' },
-
-    -- `z` key
-    { mode = { 'n', 'x' }, keys = 'z' },
-  },
-  clues = {
-    miniclue.gen_clues.square_brackets(),
-    miniclue.gen_clues.builtin_completion(),
-    miniclue.gen_clues.g(),
-    miniclue.gen_clues.marks(),
-    miniclue.gen_clues.registers(),
-    miniclue.gen_clues.windows(),
-    miniclue.gen_clues.z(),
-  }
-})
-
-require('mini.cmdline').setup()
-
-require('mini.diff').setup({
-  view = {
-    style = 'sign',
-    signs = { add = '▍', change = '▍', delete = '▍' },
-  }
-})
-map('n', '<leader>td', MiniDiff.toggle_overlay, {
-  desc = "Toggle git hunk overlay"
-})
-local gh_apply = function() return MiniDiff.operator('apply') .. 'gh' end
-map('n', '<leader>gha', gh_apply, { expr = true, remap = true })
-local gh_reset = function() return MiniDiff.operator('reset') .. 'gh' end
-map('n', '<leader>ghr', gh_reset, { expr = true, remap = true })
-
-
-require('mini.files').setup({
-  mappings = {
-    go_in       = 'L',
-    go_in_plus  = 'l',
-  }
-})
-
-local function open_mini_files_here()
-  local buf_name = vim.api.nvim_buf_get_name(0)
-
-  if buf_name == "" then
-    MiniFiles.open(vim.loop.cwd())
-  else
-    MiniFiles.open(buf_name)
-  end
-end
-map('n', '<leader>e', open_mini_files_here, {desc = "Open file manager"})
-
-require('mini.git').setup()
-
-local function run_git(cmd, success_msg, opts)
-  local data = MiniGit.get_buf_data(0)
-
-  if not data or not data.root then
-    vim.notify('Not in a Git repository')
-    return
-  end
-
-  if opts and opts.block_during_in_progress and data.in_progress ~= '' then
-    vim.notify('Git operation in progress: ' .. data.in_progress)
-    return
-  end
-
-  vim.system(cmd, { cwd = data.root, text = true }, function(obj)
-    if obj.code == 0 then
-      vim.notify(success_msg)
-    else
-      vim.notify('Git failed: ' .. obj.stderr)
-    end
-  end)
-end
-
-map('n', '<leader>gc', function()
-  local data = MiniGit.get_buf_data(0)
-
-  if not data or not data.root then
-    vim.notify('Not in a Git repository')
-    return
-  end
-
-  local message = vim.fn.input 'Commit message: '
-
-  if message ~= '' then
-    local command = { 'git', 'commit', '-m', message }
-    vim.system(command, { cwd = data.root, text = true }, function(obj)
-      if obj.code == 0 then
-        vim.notify(obj.stdout)
-      else
-        vim.notify('Git failed: ' .. obj.stderr)
-      end
-    end)
-
-  else print 'Commit canceled.' end
-end, {desc = "Git commit"})
-map('n', '<leader>gC', '<Cmd>Git commit --amend --no-edit<CR>',
-  { desc = "Git commit amend" })
-
-map('n', '<leader>ga', '<Cmd>Git add %<CR>', {desc = "Git add current file"})
-map('n', '<leader>gA', '<Cmd>Git add .<CR>', {desc = "Git add all files"})
-map('n', '<leader>gu', '<Cmd>Git restore --staged %<CR>',
-  {desc = "Git add current file"})
-map('n', '<leader>gU', '<Cmd>Git restore --staged .<CR>',
-  {desc = "Git add current file"})
-map('n', '<leader>gl', '<Cmd>Git log<CR>', {desc = "Git log"})
-
-map('n', '<leader>gp', function()
-  run_git({ 'git', 'push' }, 'Pushed changes to remote.')
-end, { desc = "Git push" })
-map('n', '<leader>gP', function()
-  run_git({ 'git', 'pull' }, 'Pulled changes from remote.', {
-    block_during_in_progress = true,
-  })
-end, { desc = "Git pull" })
-map('n', '<leader>gF', function()
-  run_git({ 'git', 'fetch' }, 'Fetched changes from remote.')
-end, { desc = "Git fetch" })
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "gitcommit",
-  callback = function()
-    vim.cmd("startinsert")
-  end,
-})
-
-require('mini.pick').setup()
-
-require('mini.cursorword').setup()
-
-require('mini.icons').setup()
-MiniIcons.mock_nvim_web_devicons()
-
-require('mini.notify').setup()
-map('n', '<leader>sn', MiniNotify.show_history, {desc = "Show notifications"})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  callback = function()
-    require('mini.trailspace').trim()
-    require('mini.trailspace').trim_last_lines()
-  end,
-})
-
-require('persisted').setup({
-  should_save = function ()
-    if vim.bo.filetype == "snacks_dashboard" then
-      return false
-    end
-
-    local cwd = vim.loop.cwd()  -- fast + clean
-
-    local blocklist = {
-      vim.fn.expand("~"), vim.fn.expand("~/.config")
-    }
-
-    for _, path in ipairs(blocklist) do
-      if cwd == path then
-        return false
-      end
-    end
-
-    return true
-  end
-})
-
-require('snacks').setup({
-  buffdelete = { enabled = true },
-  dashboard = {
-    preset = {
-      keys = {
-        { icon = " ", key = "f", desc = "Find File",
-          action = function() Snacks.picker.files() end },
-        { icon = " ", key = "g", desc = "Find Text",
-          action = function() Snacks.picker.grep() end },
-        { icon = " ", key = "r", desc = "Recent Files",
-          action = function() Snacks.picker.recent() end },
-        { icon = " ", key = "s", desc = "Restore Session",
-          action = ":Persisted load" },
-        { icon = " ", key = "q", desc = "Quit", action = ":qa" },
-      },
-    },
-    sections = {
-      { section = 'keys', gap = 1, padding = 1 },
-    },
-  },
-  gitbrowse = {
-    what = "branch"
-  },
-  picker = {
-        ui_select = true,
-        sources = {
-          files = {
-            hidden = true,
-          },
-          grep = {
-            hidden = true,
-          },
-        },
-        win = {
-          -- input window
-          input = {
-            keys = {
-              ['<M-q>'] = { 'cancel', mode = 'i' },
-              ['<M-Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
-              ['<M-S-Space>'] = { 'select_and_prev', mode = { 'i', 'n' } },
-              ['<M-a>'] = { 'select_all', mode = { 'i', 'n' } },
-              ['<M-w>'] = { '<c-s-w>', mode = { 'i' }, expr = true, desc = 'delete word' },
-              ['<M-j>'] = { 'list_down', mode = { 'i', 'n' } },
-              ['<M-k>'] = { 'list_up', mode = { 'i', 'n' } },
-              ['<M-h>'] = { 'toggle_hidden', mode = { 'i', 'n' } },
-              ['<M-i>'] = { 'toggle_ignored', mode = { 'i', 'n' } },
-              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
-              ['<M-b>'] = { 'preview_scroll_up', mode = { 'i', 'n' } },
-              ['<M-f>'] = { 'preview_scroll_down', mode = { 'i', 'n' } },
-              ['<M-S-k>'] = { 'list_scroll_down', mode = { 'i', 'n' } },
-              ['<M-S-l>'] = { 'list_scroll_up', mode = { 'i', 'n' } },
-              ['<M-s>'] = { 'edit_split', mode = { 'i', 'n' } },
-              ['<M-S-s>'] = { 'edit_vsplit', mode = { 'i', 'n' } },
-              ['<M-r><M-a>'] = { 'insert_cWORD', mode = 'i' },
-              ['<M-r><M-f>'] = { 'insert_file', mode = 'i' },
-              ['<M-r><M-l>'] = { 'insert_line', mode = 'i' },
-              ['<M-r><M-p>'] = { 'insert_file_full', mode = 'i' },
-            },
-            b = {
-              minipairs_disable = true,
-            },
-          },
-          -- preview window
-          preview = {
-            keys = {
-              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
-            },
-          },
-          -- result list window
-          list = {
-            keys = {
-              ['<M-q>'] = 'cancel',
-              ['<M-Tab>'] = { 'cycle_win', mode = { 'i', 'n' } },
-              ['<M-Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
-              ['<M-S-Space>'] = { 'select_and_prev', mode = { 'i', 'n' } },
-              ['<a-d>'] = 'inspect',
-              ['<M-h>'] = 'toggle_hidden',
-              ['<M-i>'] = 'toggle_ignored',
-              ['<M-a>'] = 'select_all',
-              ['<M-b>'] = { 'preview_scroll_up', mode = { 'i', 'n' } },
-              ['<M-f>'] = { 'preview_scroll_down', mode = { 'i', 'n' } },
-              ['<M-s>'] = { 'edit_split', mode = { 'i', 'n' } },
-              ['<M-S-s>'] = { 'edit_vsplit', mode = { 'i', 'n' } },
-            },
-            wo = {
-              conceallevel = 2,
-              concealcursor = 'nvc',
-            },
-          },
-        },
-      },
-  quickfile = { enabled = true },
-  scope = {},
-  statuscolumn = {}
-})
-
-map('n', '<leader>sf', function() Snacks.picker.files() end, {desc = "Search files"})
-map('n', '<leader>sg', function() Snacks.picker.grep() end, {desc = "Grep files live"})
-map('n', '<leader>/', function() Snacks.picker.lines() end, {desc = "Fuzzy search lines"})
-map('n', '<leader>so', function() Snacks.picker.recent() end, { desc = "Search old files" })
-
-map('n', '<leader>sr', function() Snacks.picker.resume() end, {desc = "Resume latest picker"})
-map('n', '<leader>ss', function() Snacks.picker.pickers() end, { desc = "Search snacks pickers" })
-
-map('n', '<leader>sh', function() Snacks.picker.help() end, {desc = "Search help pages"})
-map('n', '<leader>sd', function() Snacks.picker.diagnostics() end,
-  { desc = "Search diagnostics" })
-map('n', '<leader>sk', function() Snacks.picker.keymaps() end, { desc = "Search keymaps" })
-map('n', '<leader>si', function() Snacks.picker.icons() end, { desc = "Search keymaps" })
-map('n', '<leader>sq', function()
-    MiniExtra.pickers.list({scope='quickfix'})
-end, { desc = "Search quickfix list" })
-map('n', '<leader>sm', function() Snacks.picker.man() end, { desc = "Search manpages" })
-
-map('n', '<leader>sN', function()
-  Snacks.picker.files { cwd = vim.fn.stdpath 'config' }
-end, { desc = "Search neovim files" })
-
-
-map('n', '<leader>gb', function()
-        Snacks.picker.git_branches {
-          all = true,
-          win = {
-            input = {
-              keys = {
-                ['<M-a>'] = { 'git_branch_add', mode = { 'n', 'i' } },
-                ['<M-S-d>'] = { 'git_branch_del', mode = { 'n', 'i' } },
-              },
-            },
-          },
-        }
-end, { desc = "Search git branches" })
-map('n', '<leader>ge', function() Snacks.picker.git_status() end, { desc = "Search manpages" })
-map('n', '<leader>gf', function() Snacks.picker.git_log_file() end, { desc = "Search manpages" })
-map('n', '<leader>gB', function() Snacks.gitbrowse() end,
-  { desc = 'Open current git remote in browser' })
-
-
-vim.api.nvim_create_autocmd("User", {
-  pattern = "MiniFilesActionRename",
-  callback = function(event)
-    Snacks.rename.on_rename_file(event.data.from, event.data.to)
-  end,
-})
-
-vim.g.barbar_auto_setup = false
-require('barbar').setup({
-  auto_hide = 0,
-  animation = false,
-  highlight_visible = true,
-  icons = {
-    button = false,
-    filetype = {
-      custom_colors = false,
-      enabled = true,
-    },
-    separator_at_end = false,
-  }
-})
-
-vim.opt.sessionoptions:append 'globals'
-vim.api.nvim_create_autocmd({ 'User' }, {
-  pattern = 'PersistedSavePre',
-  group = vim.api.nvim_create_augroup('PersistedHooks', {}),
-  callback = function()
-    vim.api.nvim_exec_autocmds('User', { pattern = 'SessionSavePre' })
-  end,
-})
-
-local function buffer_switch(direction)
-  local count = vim.v.count > 0 and vim.v.count or 1
-  vim.cmd((direction == 'next' and 'BufferNext ' or 'BufferPrevious ') .. count)
-end
-
-map('n', '<A-.>', function() buffer_switch 'next' end,
-  { desc = 'Go to next buffer' })
-map('n', '<A-,>', function() buffer_switch 'previous' end,
-  { desc = 'Go to previous buffer' })
-
-map('n', '<A-<>', '<Cmd>BufferMovePrevious<CR>')
-map('n', '<A->>', '<Cmd>BufferMoveNext<CR>')
-
-map('n', '<leader>br', '<Cmd>BufferRestore<CR>',
-  { desc = 'Restore last close buffer' })
-
-map('n', '<A-S-p>', '<Cmd>BufferPin<CR>')
-
-map('n', '<leader>bp', '<Cmd>BufferPick<CR>',
-  { desc = 'Magic buffer Picker' })
-map('n', '<leader>bd', '<Cmd>BufferPickDelete<CR>',
-  { desc = 'Magic buffer Deleter' })
-
-map('n', '<leader>bqo', function() Snacks.bufdelete.other() end,
-  { desc = 'Close Other buffers' })
-map('n', '<A-q>', function() Snacks.bufdelete() end,
-  { desc = 'Close Current buffer' })
-
-map('n', '<leader>bwc', '<Cmd>w<CR>', { desc = 'Write Current file' })
-map('n', '<leader>bwa', '<Cmd>wa<CR>', { desc = 'Write All files' })
-
-map('n', '<A-1>', '<Cmd>BufferGoto 1<CR>')
-map('n', '<A-2>', '<Cmd>BufferGoto 2<CR>')
-map('n', '<A-3>', '<Cmd>BufferGoto 3<CR>')
-map('n', '<A-4>', '<Cmd>BufferGoto 4<CR>')
-map('n', '<A-5>', '<Cmd>BufferGoto 5<CR>')
-map('n', '<A-6>', '<Cmd>BufferGoto 6<CR>')
-map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>')
-map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>')
-map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>')
-map('n', '<A-0>', '<Cmd>BufferLast<CR>')
-
-require('toggleterm').setup({--[[ things you want to change go here]]
-    size = function(term)
-      if term.direction == 'horizontal' then
-        return 15
-      elseif term.direction == 'vertical' then
-        return vim.o.columns * 0.4
-      end
-    end,
-    terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
-    auto_scroll = true, -- automatically scroll to the bottom on terminal output
-    persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
-    -- on_open = function()
-    --   vim.cmd 'startinsert'
-    -- end, -- function to run when the terminal opens
-  })
-
-
-map('n', '<A-`>', ':ToggleTerm<CR>', { desc = 'Toggle terminal' })
-map('t', '<A-`>', '<Cmd>ToggleTerm<CR>', { desc = 'Hide terminal' })
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "toggleterm",
-  callback = function()
-    vim.opt_local.laststatus = 0
-  end,
-})
