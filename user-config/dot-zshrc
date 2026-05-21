@@ -203,6 +203,17 @@ alias z="nocorrect z"
 
 alias ls="${aliases[ls]:-ls} -A"
 
+function devcontainer_args() {
+  cat <<EOF
+-v $HOME/boring-dots/user-config/dot-config/nvim:/etc/xdg/nvim:ro,Z
+-v $HOME/boring-dots/user-config/dot-zshrc:/etc/xdg/.zshrc:ro,Z
+-v bun_cache:/root/.bun
+-v pnpm_store:/pnpm-store
+-v nvim_data:/usr/local/share/nvim
+-v nvim_state:/usr/local/state/nvim
+EOF
+}
+
 function y() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
     command yazi "$@" --cwd-file="$tmp"
