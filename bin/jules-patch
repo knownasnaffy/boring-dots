@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+url="$1"
+prefix="$2"
+
+if [[ -z "$url" || -z "$prefix" ]]; then
+    echo "Usage: $0 <session-url> <prefix>"
+    exit 1
+fi
+
+# Extract session ID
+session_id="$(printf '%s\n' "$url" | sed -nE 's|.*\/session\/([0-9]+).*|\1|p')"
+
+if [[ -z "$session_id" ]]; then
+    echo "Invalid session URL"
+    exit 1
+fi
+
+# Find first available patch filename
+i=1
+while [[ -e "${prefix}-${i}.patch" ]]; do
+    ((i++))
+done
+
+patch_file="${prefix}-${i}.patch"
+
+echo "Session ID : $session_id"
+echo "Patch file : $patch_file"
+
+jules remote pull --session "$session_id" > "$patch_file"
