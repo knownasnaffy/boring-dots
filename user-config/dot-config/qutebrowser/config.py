@@ -41,22 +41,24 @@ config.unbind("L")
 config.bind("J", "scroll-page 0 0.5")  # Instead of "C-d"
 config.bind("K", "scroll-page 0 -0.5")  # Instead of "C-i"
 
-config.bind("<Alt-o>", "back")  # Instead of "H"
-config.bind("<Alt-i>", "forward")  # Instead of "L"
-config.bind("<Alt-.>", "tab-next")  # Instead of "J"
-config.bind("<Alt-,>", "tab-prev")  # Instead of "K"
-config.bind("<Alt-.>", "tab-next", mode="insert")  # Instead of "J"
-config.bind("<Alt-,>", "tab-prev", mode="insert")  # Instead of "K"
+config.bind("<Ctrl-o>", "back")  # Instead of "H"
+config.bind("<Ctrl-i>", "forward")  # Instead of "L"
+config.bind("<Ctrl-.>", "tab-next")  # Instead of "J"
+config.bind("<Ctrl-,>", "tab-prev")  # Instead of "K"
+config.bind("<Ctrl-.>", "tab-next", mode="insert")  # Instead of "J"
+config.bind("<Ctrl-,>", "tab-prev", mode="insert")  # Instead of "K"
 
-config.bind("<Alt-c>", "fake-key <Ctrl+c>", mode="normal")
-config.bind("<Alt-c>", "fake-key <Ctrl+c>", mode="insert")
-config.bind("<Alt-c>", "fake-key <Ctrl+c>", mode="caret")
+config.unbind("<Ctrl-q>")
+config.bind("<Ctrl-q>", "mode-enter normal", mode="insert")
+config.bind("<Ctrl-q>", "mode-enter normal", mode="caret")
+config.bind("<Ctrl-q>", "mode-enter normal", mode="passthrough")
 
-config.bind("<Alt-v>", "fake-key <Ctrl+v>", mode="insert")
-config.bind("<Alt-v>", "fake-key <Ctrl+v>", mode="normal")
+config.bind("td",
+    "config-cycle -u *://{url:host}/* colors.webpage.darkmode.enabled ;; reload",
+    mode="normal")
 
-config.bind("<Alt-q>", "mode-enter normal", mode="insert")
-config.bind("<Alt-q>", "mode-enter normal", mode="caret")
-config.bind("<Alt-q>", "mode-enter normal", mode="passthrough")
+for i in range(1, 10):
+    config.bind(f"<Ctrl-{i}>", f"tab-focus {i}")
 
-config.bind("td", "config-cycle -u *://{url:host}/* colors.webpage.darkmode.enabled ;; reload", mode="normal")
+
+config.bind("<Ctrl-0>", "tab-focus last")
