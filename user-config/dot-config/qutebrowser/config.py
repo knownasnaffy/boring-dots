@@ -29,6 +29,7 @@ c.url.searchengines["DEFAULT"] = "https://duckduckgo.com/?q={}"
 c.url.searchengines["p"] = "https://www.perplexity.ai/?q={}"
 c.url.searchengines["y"] = "https://www.youtube.com/results?search_query={}"
 c.url.searchengines["c"] = "https://chatgpt.com/?prompt={}"
+c.url.searchengines["s"] = "https://www.google.com/search?udm=50&q={}"
 
 c.window.hide_decoration = True
 
