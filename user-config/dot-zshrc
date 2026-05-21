@@ -201,6 +201,8 @@ function preexec {
 
 alias z="nocorrect z"
 
+alias ls="${aliases[ls]:-ls} -A"
+
 function y() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
     command yazi "$@" --cwd-file="$tmp"
