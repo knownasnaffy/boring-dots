@@ -129,7 +129,11 @@ end)
 -- Troubleshooting:
 -- - Run `:checkhealth vim.lsp` to see potential issues.
 now_if_args(function()
-  add({ 'https://github.com/neovim/nvim-lspconfig' })
+  add({
+    'https://github.com/neovim/nvim-lspconfig',
+    'https://github.com/mason-org/mason.nvim',
+    'https://github.com/mason-org/mason-lspconfig.nvim'
+  })
 
   -- Use `:h vim.lsp.enable()` to automatically enable language server based on
   -- the rules provided by 'nvim-lspconfig'.
@@ -138,6 +142,19 @@ now_if_args(function()
   -- vim.lsp.enable({
   --   -- For example, if `lua-language-server` is installed, use `'lua_ls'` entry
   -- })
+
+  require('mason').setup()
+
+  ensure_installed = {
+    'lua_ls',
+    'tailwindcss',
+    'vtsls'
+  }
+
+  require("mason-lspconfig").setup({
+    automatic_enable = true,
+    ensure_installed = ensure_installed
+  })
 end)
 
 -- Formatting =================================================================
