@@ -296,8 +296,13 @@ nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>',   'Read')
 nmap_leader('sR', '<Cmd>lua MiniSessions.restart()<CR>',        'Restart')
 nmap_leader('sw', '<Cmd>lua MiniSessions.write()<CR>',          'Write current')
 
--- t is for 'Terminal'
-nmap_leader('tt', ':ToggleTerm<CR>', 'Terminal')
+-- t is for 'Toggle'
+local toggle_inlay_hints = function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+end
+
+nmap_leader('tt', ':ToggleTerm<CR>',  'Terminal')
+nmap_leader('ti', toggle_inlay_hints, 'Inlay Hints')
 
 -- v is for 'Visits'. Common usage:
 -- - `<Leader>vv` - add    "core" label to current file.
