@@ -28,11 +28,11 @@ map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 -- Clear search highlights on esc press
 nmap('<Esc>', '<cmd>nohlsearch<CR>')
 
-nmap('<C-S-j>', '<Cmd>copy +0<CR>')
-nmap('<C-S-k>', '<Cmd>copy -1<CR>')
+nmap('<C-J>', '<Cmd>copy +0<CR>')
+nmap('<C-K>', '<Cmd>copy -1<CR>')
 
-map('x', '<C-S-j>', ":copy '><CR>gv")
-map('x', '<C-S-k>', ":copy -1<CR>gv")
+map('x', '<C-J>', ":copy '><CR>gv")
+map('x', '<C-K>', ":copy -1<CR>gv")
 
 -- Alias to open link
 nmap('g;', function()
