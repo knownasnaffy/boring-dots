@@ -259,10 +259,7 @@ local git_commit_with_msg = function()
             return
         end
 
-        vim.cmd({
-            cmd = 'Git',
-            args = { 'commit', '-m', input },
-        })
+        vim.cmd({ cmd = 'Git', args = { 'commit', '-m', input }})
     end)
 end
 
