@@ -220,6 +220,37 @@ nmap_leader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (cw
 -- - `<Leader>gL` - show Git log of current file
 local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
 local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
+
+local run_git = function(cmd, success_msg, opts)
+  return function()
+    local data = MiniGit.get_buf_data(0)
+
+    if not data or not data.root then
+      vim.notify('Not in a Git repository')
+      return
+    end
+
+    if opts and opts.block_during_in_progress and data.in_progress ~= '' then
+      vim.notify('Git operation in progress: ' .. data.in_progress)
+      return
+    end
+
+    local notif = vim.notify('Performing git action...',
+      vim.log.levels.INFO, { timeout = false })
+
+    vim.system(cmd, { cwd = data.root, text = true }, function(obj)
+      vim.schedule(function()
+        if obj.code == 0 then
+          vim.notify(success_msg, vim.log.levels.INFO, { replace = notif })
+        else
+          vim.notify('Git failed: ' .. obj.stderr,
+            vim.log.levels.ERROR, { replace = notif })
+        end
+      end)
+    end)
+  end
+end
+
 local git_commit_with_msg = function()
   vim.ui.input({
         prompt = 'Commit message: ',
@@ -235,15 +266,32 @@ local git_commit_with_msg = function()
     end)
 end
 
+local git_fetch = run_git(
+  { 'git', 'fetch' },
+  'Fetched changes from remote.', {}
+)
+local git_push = run_git(
+  { 'git', 'push' },
+  'Pushed changes to remote.', {}
+)
+local git_pull = run_git(
+  { 'git', 'pull' },
+  'Pulled changes from remote.',
+  { block_during_in_progress = true, }
+)
+
 nmap_leader('ga', '<Cmd>Git add %<CR>',                     'Stage current file')
 nmap_leader('gA', '<Cmd>Git add .<CR>',                     'Stage all files')
 nmap_leader('gc', git_commit_with_msg,                      'Commit')
 nmap_leader('gC', '<Cmd>Git commit --amend --no-edit<CR>',  'Commit amend')
 nmap_leader('gd', '<Cmd>Git diff<CR>',                      'Diff')
 nmap_leader('gD', '<Cmd>Git diff -- %<CR>',                 'Diff buffer')
+nmap_leader('gf', git_fetch,                                'Fetch changes')
 nmap_leader('gl', '<Cmd>' .. git_log_cmd .. '<CR>',         'Log')
 nmap_leader('gL', '<Cmd>' .. git_log_buf_cmd .. '<CR>',     'Log buffer')
 nmap_leader('go', '<Cmd>lua MiniDiff.toggle_overlay()<CR>', 'Toggle overlay')
+nmap_leader('gp', git_push,                                 'Push changes')
+nmap_leader('gP', git_pull,                                 'Pull changes')
 nmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
 
 xmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>', 'Show at selection')
