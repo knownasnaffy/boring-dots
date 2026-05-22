@@ -220,10 +220,24 @@ nmap_leader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (cw
 -- - `<Leader>gL` - show Git log of current file
 local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
 local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
+local git_commit_with_msg = function()
+  vim.ui.input({
+        prompt = 'Commit message: ',
+    }, function(input)
+        if not input or input == '' then
+            return
+        end
+
+        vim.cmd({
+            cmd = 'Git',
+            args = { 'commit', '-m', input },
+        })
+    end)
+end
 
 nmap_leader('ga', '<Cmd>Git add %<CR>',                     'Stage current file')
 nmap_leader('gA', '<Cmd>Git add .<CR>',                     'Stage all files')
-nmap_leader('gc', '<Cmd>Git commit<CR>',                    'Commit')
+nmap_leader('gc', git_commit_with_msg,                      'Commit')
 nmap_leader('gC', '<Cmd>Git commit --amend --no-edit<CR>',  'Commit amend')
 nmap_leader('gd', '<Cmd>Git diff<CR>',                      'Diff')
 nmap_leader('gD', '<Cmd>Git diff -- %<CR>',                 'Diff buffer')
