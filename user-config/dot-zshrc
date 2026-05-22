@@ -103,7 +103,7 @@ bindkey '^s' sudo-command-line                     # Ctrl+s → prefix sudo to c
 bindkey '^b' backward-word                          # Alt+Shift+b → move word left
 bindkey '^f' forward-word                           # Alt+Shift+f → move word right
 bindkey '^o' dirhistory_zle_dirhistory_back         # Alt+o → previous directory
-bindkey '^i' dirhistory_zle_dirhistory_future       # Alt+i → next directory
+bindkey '^O' dirhistory_zle_dirhistory_future       # Alt+i → next directory
 
 # Bind A+A+E (Alt+e) to run AI Chat on current buffer
 _aichat_zsh() {
