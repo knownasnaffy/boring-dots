@@ -45,13 +45,6 @@ map({ 'c', 'i' }, '<C-d>', '<C-Del>', { desc = 'Delete word forward' })
 map({ 'c', 'i' }, '<C-b>', '<C-left>', { desc = 'Move backward one word' })
 map({ 'c', 'i' }, '<C-f>', '<C-left>', { desc = 'Move forward one word' })
 
--- WM integrated window navigation
-local function wcmd(cmd)
-  return function ()
-    vim.cmd.wincmd(cmd)
-  end
-end
-
 local function move_or_exec(dir, cmd)
   return function()
     local current = vim.fn.winnr()
@@ -74,6 +67,9 @@ nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"),
    'Move focus to the lower window' )
 nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"),
    'Move focus to the upper window' )
+
+nmap('<C-Space>', ':ToggleTerm<CR>',  'Toggle Terminal')
+map('t', '<C-Space>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
 
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
@@ -347,7 +343,6 @@ local toggle_inlay_hints = function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end
 
-nmap_leader('tt', ':ToggleTerm<CR>',  'Terminal')
 nmap_leader('ti', toggle_inlay_hints, 'Inlay Hints')
 
 -- v is for 'Visits'. Common usage:
