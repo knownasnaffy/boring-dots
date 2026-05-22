@@ -179,7 +179,7 @@ later(function()
     },
     -- Map of filetype to formatters
     -- Make sure that necessary CLI tool is available
-    -- formatters_by_ft = { lua = { 'stylua' } },
+    formatters_by_ft = { lua = { 'stylua' }, python = { 'ruff' } },
   })
 end)
 
@@ -194,36 +194,8 @@ end)
 -- See `:h MiniSnippets.gen_loader.from_lang()`.
 later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 
--- Honorable mentions =========================================================
 
--- 'mason-org/mason.nvim' (a.k.a. "Mason") is a great tool (package manager) for
--- installing external language servers, formatters, and linters. It provides
--- a unified interface for installing, updating, and deleting such programs.
---
--- The caveat is that these programs will be set up to be mostly used inside Neovim.
--- If you need them to work elsewhere, consider using other package managers.
---
--- You can use it like so:
--- now_if_args(function()
---   add({ 'https://github.com/mason-org/mason.nvim' })
---   require('mason').setup()
--- end)
-
--- Beautiful, usable, well maintained color schemes outside of 'mini.nvim' and
--- have full support of its highlight groups. Use if you don't like 'miniwinter'
--- enabled in 'plugin/30_mini.lua' or other suggested 'mini.hues' based ones.
--- Config.now(function()
---  -- Install only those that you need
---  add({
---    'https://github.com/sainnhe/everforest',
---    'https://github.com/Shatur/neovim-ayu',
---    'https://github.com/ellisonleao/gruvbox.nvim',
---  })
---
---   -- Enable only one
---   vim.cmd('color everforest')
--- end)
-
+-- Snacks =====================================================================
 now(function()
   add({'https://github.com/folke/snacks.nvim'})
   local snacks = require('snacks')
