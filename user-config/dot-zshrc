@@ -64,16 +64,19 @@ PROMPT=$'
         fi
     done
 
+    local container_suffix=""
+    [[ $container == "oci" ]] && container_suffix=" %F{white}in %F{yellow}OCI%f"
+
     if $trusted; then
         local branch=$(git_current_branch)
 
         if [[ -n $branch ]]; then
-            echo "%c %F{white}on %F{magenta}$branch %F{red}$(git_prompt_status)%f"
+            echo "%c %F{white}on %F{magenta}$branch %F{red}$(git_prompt_status)%f %f${container_suffix}"
         else
-            echo "%~"
+            echo "%~${container_suffix}"
         fi
     else
-        echo "%~"
+        echo "%~${container_suffix}"
     fi
 )
 %(?.%F{green}➜%f.%F{red}➜%f) %{$reset_color%}'
@@ -197,12 +200,13 @@ alias ls="${aliases[ls]:-ls} -A"
 
 function devcontainer_args() {
   cat <<EOF
--v $HOME/boring-dots/user-config/dot-config/nvim:/etc/xdg/nvim:ro,Z
--v $HOME/boring-dots/user-config/dot-zshrc:/etc/xdg/.zshrc:ro,Z
--v bun_cache:/root/.bun
--v pnpm_store:/pnpm-store
--v nvim_data:/usr/local/share/nvim
--v nvim_state:/usr/local/state/nvim
+-v $HOME/boring-dots/user-config/dot-config/nvim:/home/barinr/.config/nvim:ro,Z
+-v $HOME/boring-dots/user-config/dot-zshrc:/home/barinr/.zshrc:ro,Z
+-v $HOME/.oh-my-zsh:/home/barinr/.oh-my-zsh:ro,Z
+-v bun_cache:/home/barinr/.bun
+-v pnpm_store:/home/barinr/.local/share/pnpm
+-v nvim_data:/home/barinr/.local/share/nvim
+-v nvim_state:/home/barinr/.local/state/nvim
 EOF
 }
 
