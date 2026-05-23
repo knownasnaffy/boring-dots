@@ -23,7 +23,7 @@ nmap(']p', '<Cmd>exe "iput "  . v:register<CR>', 'Paste Below')
 
 -- Exiting insert and terminal mode
 map('i', '<C-q>', '<Esc>')
-map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+map('t', '<C-q>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- Clear search highlights on esc press
 nmap('<Esc>', '<cmd>nohlsearch<CR>')
