@@ -99,16 +99,26 @@ ZSH_THEME_GIT_PROMPT_UNTRACKED=""
 
 bindkey -e  # Use Emacs keybindings
 
-# Custom sudo keybind
-bindkey '^s' sudo-command-line                     # Ctrl+s → prefix sudo to current or last command
-
 # Custom word and line deletion
-bindkey '^b' backward-word                          # Alt+Shift+b → move word left
-bindkey '^f' forward-word                           # Alt+Shift+f → move word right
-bindkey '^o' dirhistory_zle_dirhistory_back         # Alt+o → previous directory
-bindkey '^O' dirhistory_zle_dirhistory_future       # Alt+i → next directory
+bindkey '^b' backward-word                          # Ctrl+b → move word left
+bindkey '^f' forward-word                           # Ctrl+f → move word right
+bindkey '^o' dirhistory_zle_dirhistory_back         # Ctrl+o → previous directory
+bindkey '^O' dirhistory_zle_dirhistory_future       # Ctrl+Shift+o → next directory
+# Other keybinds:
+# - Ctrl+i → next completion
+# - Ctrl+e → end of line
+# - Ctrl+a → start of line
+# - Ctrl+k → delete till end of line
+# - Ctrl+u → delete till start of line
+# - Ctrl+r → search history backward
+# - Ctrl+t → find and insert file path from current cwd
+# - Ctrl+q → push current command aside temporarily
+# - Ctrl+Shift+- → undo
+# During active process:
+# - Ctrl+s → freeze output
+# - Ctrl+q → unfreeze output
 
-# Bind A+A+E (Alt+e) to run AI Chat on current buffer
+# Bind Ctrl+g to run AI Chat on current buffer
 _aichat_zsh() {
     if [[ -n "$BUFFER" ]]; then
         local _old=$BUFFER
@@ -125,7 +135,7 @@ bindkey '^g' _aichat_zsh
 # Copy buffer to clipboard
 copy-buffer() { echo -n $BUFFER | wl-copy }
 zle -N copy-buffer
-bindkey '^y' copy-buffer                            # Alt+y
+bindkey '^y' copy-buffer                            # Ctrl+y
 
 
 
