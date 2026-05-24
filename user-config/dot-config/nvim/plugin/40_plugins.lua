@@ -125,7 +125,11 @@ now_if_args(function()
   add({
     'https://github.com/neovim/nvim-lspconfig',
     'https://github.com/mason-org/mason.nvim',
-    'https://github.com/mason-org/mason-lspconfig.nvim'
+    'https://github.com/mason-org/mason-lspconfig.nvim',
+    {
+      src = 'https://github.com/Saghen/blink.cmp',
+      version = 'v1'
+    }
   })
 
   -- Use `:h vim.lsp.enable()` to automatically enable language server based on
@@ -144,10 +148,70 @@ now_if_args(function()
     'vtsls'
   }
 
+  local capabilities = require('blink.cmp').get_lsp_capabilities()
+
+  for _, lsp in ipairs(ensure_installed) do
+    vim.lsp.config(lsp, { capabilities = capabilities })
+  end
+
   require("mason-lspconfig").setup({
     automatic_enable = true,
     ensure_installed = ensure_installed
   })
+end)
+
+
+-- Completion =================================================================
+
+now_if_args(function()
+  add({{
+    src = 'https://github.com/Saghen/blink.cmp',
+    version = 'v1'
+  }})
+
+  local opts = {
+    -- C-space: Open menu or toggle docs if already open
+    -- C-n/C-p or Up/Down: Select next/previous item
+    -- C-e: Hide menu
+    -- C-k: Toggle signature help (if signature.enabled = true)
+    -- CR: Select and apply
+    -- Tab: Snippet forward
+    -- S-Tab: Snippet backward
+    --
+    -- See :h blink-cmp-config-keymap for defining your own keymap
+    keymap = { preset = 'enter' },
+
+    appearance = {
+      -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+      -- Adjusts spacing to ensure icons are aligned
+      nerd_font_variant = 'mono'
+    },
+
+    -- (Default) Only show the documentation popup when manually triggered
+    completion = {
+      documentation = { auto_show = false },
+      selection = { preselect = false },
+      ghost_text = {
+        enabled = true,
+        show_with_menu = false
+      }
+    },
+
+    -- Default list of enabled providers defined so that you can extend it
+    -- elsewhere in your config, without redefining it, due to `opts_extend`
+    sources = {
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
+    },
+
+    -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+    -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+    -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+    --
+    -- See the fuzzy documentation for more information
+    fuzzy = { implementation = "prefer_rust_with_warning" }
+  }
+
+  require('blink.cmp').setup(opts)
 end)
 
 -- Formatting =================================================================
