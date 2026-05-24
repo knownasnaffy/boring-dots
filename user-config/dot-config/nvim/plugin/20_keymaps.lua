@@ -43,7 +43,7 @@ end, 'Open stuff under cursor' )
 -- Better text editing
 map({ 'c', 'i' }, '<C-d>', '<C-Del>', { desc = 'Delete word forward' })
 map({ 'c', 'i' }, '<C-b>', '<C-left>', { desc = 'Move backward one word' })
-map({ 'c', 'i' }, '<C-f>', '<C-left>', { desc = 'Move forward one word' })
+map({ 'c', 'i' }, '<C-f>', '<C-right>', { desc = 'Move forward one word' })
 
 local function move_or_exec(dir, cmd)
   return function()
