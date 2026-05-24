@@ -143,6 +143,7 @@ end
 nmap_leader('ba', '<Cmd>b#<CR>',                                 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>',         'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  'Delete!')
+nmap_leader('bo', '<Cmd>%bd|e#|bd#<CR>',                         'Delete Others')
 nmap_leader('bs', new_scratch_buffer,                            'Scratch')
 nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>',        'Wipeout')
 nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
