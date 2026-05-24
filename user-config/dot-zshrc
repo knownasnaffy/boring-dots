@@ -133,7 +133,7 @@ zle -N _aichat_zsh
 bindkey '^g' _aichat_zsh
 
 # Copy buffer to clipboard
-copy-buffer() { echo -n $BUFFER | wl-copy }
+copy-buffer() { echo -n $BUFFER | xclip -selection clipboard }
 zle -N copy-buffer
 bindkey '^y' copy-buffer                            # Ctrl+y
 
