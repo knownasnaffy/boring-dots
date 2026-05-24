@@ -199,6 +199,12 @@ now_if_args(function()
           module = 'lazydev.integrations.blink',
           -- make lazydev completions top priority (see `:h blink.cmp`)
           score_offset = 100,
+          should_show_items = function()
+            return vim.tbl_contains(
+              { 'lua' },
+              vim.o.filetype
+            )
+          end,
         },
       },
     },
