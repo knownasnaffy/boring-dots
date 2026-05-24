@@ -10,7 +10,7 @@
 
 -- Make concise helpers for installing/adding plugins in two stages
 local add = vim.pack.add
-local now, now_if_args, later = Config.now, Config.now_if_args, Config.later
+local now, now_if_args, later, on_filetype = Config.now, Config.now_if_args, Config.later, Config.on_filetype
 
 -- Tree-sitter ================================================================
 
@@ -190,7 +190,7 @@ now_if_args(function()
     -- (Default) Only show the documentation popup when manually triggered
     completion = {
       documentation = { auto_show = false },
-      selection = { preselect = false },
+      list = { selection = { preselect = false } },
       ghost_text = {
         enabled = true,
         show_with_menu = false
@@ -200,7 +200,15 @@ now_if_args(function()
     -- Default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
-      default = { 'lsp', 'path', 'snippets', 'buffer' },
+      default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
+      providers = {
+        lazydev = {
+          name = 'LazyDev',
+          module = 'lazydev.integrations.blink',
+          -- make lazydev completions top priority (see `:h blink.cmp`)
+          score_offset = 100,
+        },
+      },
     },
 
     -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
@@ -293,4 +301,18 @@ later(function()
     --   vim.cmd 'startinsert'
     -- end, -- function to run when the terminal opens
   })
+end)
+
+on_filetype('lua', function()
+  add({'https://github.com/folke/lazydev.nvim'})
+
+  local opts = {
+    library = {
+      -- See the configuration section for more details
+      -- Load luvit types when the `vim.uv` word is found
+      { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+    },
+  }
+
+  require('lazydev').setup(opts)
 end)
