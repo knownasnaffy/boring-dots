@@ -102,19 +102,20 @@ map('t', '<C-Space>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
 -- This is used to provide 'mini.clue' with extra clues.
 -- Add an entry if you create a new group.
 Config.leader_group_clues = {
-  { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
-  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
-  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
-  { mode = 'n', keys = '<Leader>m', desc = '+Map' },
-  { mode = 'n', keys = '<Leader>o', desc = '+Other' },
-  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
-  { mode = 'n', keys = '<Leader>t', desc = '+Toggle' },
-  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
+  { mode = 'n', keys = '<Leader>b',  desc = '+Buffer' },
+  { mode = 'n', keys = '<Leader>e',  desc = '+Explore/Edit' },
+  { mode = 'n', keys = '<Leader>f',  desc = '+Find' },
+  { mode = 'n', keys = '<Leader>g',  desc = '+Git' },
+  { mode = 'n', keys = '<Leader>gb', desc = '+Branches' },
+  { mode = 'n', keys = '<Leader>l',  desc = '+Language' },
+  { mode = 'n', keys = '<Leader>m',  desc = '+Map' },
+  { mode = 'n', keys = '<Leader>o',  desc = '+Other' },
+  { mode = 'n', keys = '<Leader>s',  desc = '+Session' },
+  { mode = 'n', keys = '<Leader>t',  desc = '+Toggle' },
+  { mode = 'n', keys = '<Leader>v',  desc = '+Visits' },
 
-  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
+  { mode = 'x', keys = '<Leader>g',  desc = '+Git' },
+  { mode = 'x', keys = '<Leader>l',  desc = '+Language' },
 }
 
 -- Helpers for a more concise `<Leader>` mappings.
@@ -216,6 +217,8 @@ nmap_leader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (cw
 -- - `<Leader>gL` - show Git log of current file
 local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
 local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
+local git_local_branches = [[Pick git_branches scope="local"]]
+local git_remote_branches = [[Pick git_branches scope="remotes"]]
 
 local run_git = function(cmd, success_msg, opts)
   return function()
@@ -275,6 +278,9 @@ local git_pull = run_git(
 
 nmap_leader('ga', '<Cmd>Git add %<CR>',                     'Stage current file')
 nmap_leader('gA', '<Cmd>Git add .<CR>',                     'Stage all files')
+nmap_leader('gbl', '<Cmd>'.. git_local_branches .. '<CR>',  'Local')
+nmap_leader('gbr', '<Cmd>'.. git_remote_branches .. '<CR>', 'Remotes')
+nmap_leader('gb', '<Cmd>lua Snacks.gitbrowse()<CR>',        'Browse remote')
 nmap_leader('gc', git_commit_with_msg,                      'Commit')
 nmap_leader('gC', '<Cmd>Git commit --amend --no-edit<CR>',  'Commit amend')
 nmap_leader('gd', '<Cmd>Git diff<CR>',                      'Diff')
@@ -287,7 +293,7 @@ nmap_leader('gp', git_push,                                 'Push changes')
 nmap_leader('gP', git_pull,                                 'Pull changes')
 nmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
 
-xmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>', 'Show at selection')
+xmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at selection')
 
 -- l is for 'Language'. Common usage:
 -- - `<Leader>ld` - show more diagnostic details in a floating window

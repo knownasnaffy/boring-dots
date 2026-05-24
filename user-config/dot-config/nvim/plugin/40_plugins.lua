@@ -12,13 +12,6 @@
 local add = vim.pack.add
 local now, now_if_args, later = Config.now, Config.now_if_args, Config.later
 
-local nmap_leader = function(suffix, rhs, desc)
-  vim.keymap.set('n', '<Leader>' .. suffix, rhs, { desc = desc })
-end
-local xmap_leader = function(suffix, rhs, desc)
-  vim.keymap.set('x', '<Leader>' .. suffix, rhs, { desc = desc })
-end
-
 -- Tree-sitter ================================================================
 
 -- Tree-sitter is a tool for fast incremental parsing. It converts text into
@@ -145,7 +138,7 @@ now_if_args(function()
 
   require('mason').setup()
 
-  ensure_installed = {
+  local ensure_installed = {
     'lua_ls',
     'tailwindcss',
     'vtsls'
@@ -210,11 +203,6 @@ now(function()
     },
     scope = {},
   })
-
-  nmap_leader('gb', function() snacks.picker.git_branches { all = true } end, "Git branches" )
-  nmap_leader('ge', function() snacks.picker.git_status() end, "Git status" )
-  nmap_leader('gB', function() snacks.gitbrowse() end,
-    'Open current git remote in browser' )
 
   vim.api.nvim_create_autocmd("User", {
     pattern = "MiniFilesActionRename",
