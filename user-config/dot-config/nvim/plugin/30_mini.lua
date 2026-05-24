@@ -710,32 +710,32 @@ later(function() require('mini.pick').setup({
 -- - `:h MiniSnippets-examples` - examples of common setups
 -- - `:h MiniSnippets-session` - details about snippet session
 -- - `:h MiniSnippets.gen_loader` - list of available loaders
--- later(function()
---   -- Define language patterns to work better with 'friendly-snippets'
---   local latex_patterns = { 'latex/**/*.json', '**/latex.json' }
---   local lang_patterns = {
---     tex = latex_patterns,
---     plaintex = latex_patterns,
---     -- Recognize special injected language of markdown tree-sitter parser
---     markdown_inline = { 'markdown.json' },
---   }
---
---   local snippets = require('mini.snippets')
---   local config_path = vim.fn.stdpath('config')
---   snippets.setup({
---     snippets = {
---       -- Always load 'snippets/global.json' from config directory
---       snippets.gen_loader.from_file(config_path .. '/snippets/global.json'),
---       -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
---       snippets.gen_loader.from_lang({ lang_patterns = lang_patterns }),
---     },
---   })
---
---   -- By default snippets available at cursor are not shown as candidates in
---   -- 'mini.completion' menu. This requires a dedicated in-process LSP server
---   -- that will provide them. To have that, uncomment next line (use `gcc`).
---   -- MiniSnippets.start_lsp_server()
--- end)
+later(function()
+  -- Define language patterns to work better with 'friendly-snippets'
+  local latex_patterns = { 'latex/**/*.json', '**/latex.json' }
+  local lang_patterns = {
+    tex = latex_patterns,
+    plaintex = latex_patterns,
+    -- Recognize special injected language of markdown tree-sitter parser
+    markdown_inline = { 'markdown.json' },
+  }
+
+  local snippets = require('mini.snippets')
+  local config_path = vim.fn.stdpath('config')
+  snippets.setup({
+    snippets = {
+      -- Always load 'snippets/global.json' from config directory
+      snippets.gen_loader.from_file(config_path .. '/snippets/global.json'),
+      -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
+      snippets.gen_loader.from_lang({ lang_patterns = lang_patterns }),
+    },
+  })
+
+  -- By default snippets available at cursor are not shown as candidates in
+  -- 'mini.completion' menu. This requires a dedicated in-process LSP server
+  -- that will provide them. To have that, uncomment next line (use `gcc`).
+  -- MiniSnippets.start_lsp_server()
+end)
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and
