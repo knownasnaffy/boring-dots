@@ -61,4 +61,4 @@ for i in range(1, 10):
     config.bind(f"<Ctrl-{i}>", f"tab-focus {i}")
 
 
-config.bind("<Ctrl-0>", "tab-focus last")
+config.bind("<Ctrl-0>", "tab-focus -1")
