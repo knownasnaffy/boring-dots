@@ -556,7 +556,16 @@ end)
 --
 -- See also:
 -- - `:h MiniJump2d.gen_spotter` - list of available spotters
-later(function() require('mini.jump2d').setup() end)
+later(function()
+  local jump2d = require('mini.jump2d')
+  jump2d.setup({
+    spotter = jump2d.gen_spotter.union(jump2d.builtin_opts.line_start.spotter, jump2d.builtin_opts.word_start.spotter),
+    view = {
+      dim = true,
+      n_steps_ahead = 2
+    },
+  })
+end)
 
 -- Special key mappings. Provides helpers to map:
 -- - Multi-step actions. Apply action 1 if condition is met; else apply
