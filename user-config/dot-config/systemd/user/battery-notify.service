@@ -1,0 +1,9 @@
+[Unit]
+Description=Notify when battery level changes beyond thresholds
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/battery-notify.sh
+
+[Install]
+WantedBy=default.target

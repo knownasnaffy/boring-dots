@@ -65,7 +65,9 @@ case "$option" in
   *)
     echo "Attempting to install dotfiles..."
 
-    mkdir -p "$HOME/.config" "$HOME/.local/bin"
+    mkdir -p \
+      "$HOME/.config" "$HOME/.local/bin" \
+      "$HOME/.config/systemd/user"
     stow -v -t "$HOME" --dotfiles user-config
     stow -v -t "$HOME/.local/bin" --dotfiles bin
 
