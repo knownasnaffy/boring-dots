@@ -41,7 +41,7 @@ RUN --mount=type=cache,target=/var/cache/dnf \
     neovim python3-neovim lua5.1 \
     nodejs20
 
-RUN npm install --global pnpm@latest-9
+RUN npm install --global pnpm@latest-11
 
 ARG USERNAME=barinr
 ARG UID=1000
