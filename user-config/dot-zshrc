@@ -140,7 +140,7 @@ bindkey '^y' copy-buffer                            # Ctrl+y
 
 
 export EDITOR='nvim'
-export VISUAL="xfce4-terminal -e nvim"
+export VISUAL="kitty -e nvim"
 
 # Compilation flags
 export ARCHFLAGS="-arch $(uname -m)"

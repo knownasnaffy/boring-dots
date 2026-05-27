@@ -911,14 +911,14 @@ later(function()
       scroll_down = '<A-j>', --| These don't matter, used in feedkeys
       scroll_up = '<A-k>', ----|
       scroll_down_custom = {
-        char = "<C-j>",
+        char = "<C-S-j>",
         func = function()
           feedkeys("<A-j>")
           vim.schedule(preview.update)
         end,
       },
       scroll_up_custom = {
-        char = "<C-k>",
+        char = "<C-S-k>",
         func = function()
           feedkeys("<A-k>")
           vim.schedule(preview.update)

@@ -29,11 +29,11 @@ map('t', '<C-q>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 -- Clear search highlights on esc press
 nmap('<Esc>', '<cmd>nohlsearch<CR>')
 
-nmap('<C-J>', '<Cmd>copy +0<CR>')
-nmap('<C-K>', '<Cmd>copy -1<CR>')
+nmap('<C-S-j>', '<Cmd>copy +0<CR>')
+nmap('<C-S-k>', '<Cmd>copy -1<CR>')
 
-map('x', '<C-J>', ":copy '><CR>gv")
-map('x', '<C-K>', ":copy -1<CR>gv")
+map('x', '<C-S-j>', ":copy '><CR>gv")
+map('x', '<C-S-k>', ":copy -1<CR>gv")
 
 -- Alias to open link
 nmap('g;', function()
@@ -66,8 +66,8 @@ nmap('<C-w>l', move_or_exec( "l", "i3-msg focus right"), 'Move focus to the righ
 nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"), 'Move focus to the lower window' )
 nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"), 'Move focus to the upper window' )
 
-nmap('<C-Space>', ':ToggleTerm<CR>',  'Toggle Terminal')
-map('t', '<C-Space>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
+nmap('<C-`>', ':ToggleTerm<CR>',  'Toggle Terminal')
+map('t', '<C-`>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
 
 nmap("dm", "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", "Del mark" )
 

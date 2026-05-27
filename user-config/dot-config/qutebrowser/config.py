@@ -17,7 +17,7 @@ c.colors.webpage.preferred_color_scheme = "dark"
 c.content.javascript.clipboard = "access"
 c.content.user_stylesheets = [ str(config.configdir / 'style.css') ]
 
-c.editor.command = ["xfce4-terminal", "-e", "nvim", "{file}"]
+c.editor.command = ["kitty", "-e", "nvim", "{file}"]
 
 c.scrolling.smooth = True
 c.tabs.mode_on_change = "restore"
