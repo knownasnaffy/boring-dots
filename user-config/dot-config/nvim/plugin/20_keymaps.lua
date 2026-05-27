@@ -191,6 +191,27 @@ local pick_file = function()
     { source = { show = function(buf_id, items, query) MiniPick.default_show(buf_id, items, query, { show_icons = true }) end }}
   )
 end
+local pick_git_status = function()
+  local show_fn = function(buf_id, items, query)
+    -- Convert items to a table and extract path to get file icons
+    for i, item in ipairs(items) do
+      local _, filepath = string.match(item, "^%s*(%S+)%s+(%S+)$")
+      items[i] = { text = item, path = filepath }
+    end
+    return MiniPick.default_show(buf_id, items, query, { show_icons = true })
+  end
+  local choose_fn = function(item)
+    local _, path = string.match(item, "^%s*(%S+)%s+(%S+)$")
+    return MiniPick.default_choose(path)
+  end
+  local local_opts = { command = { "git", "status", "-s" } }
+  local source = {
+    name = "Git status",
+    show = show_fn,
+    choose = choose_fn,
+  }
+  return MiniPick.builtin.cli(local_opts, { source = source })
+end
 
 nmap_leader('f/', '<Cmd>Pick history scope="/"<CR>',            '"/" history')
 nmap_leader('f:', '<Cmd>Pick history scope=":"<CR>',            '":" history')
@@ -201,6 +222,7 @@ nmap_leader('fc', '<Cmd>Pick git_commits<CR>',                  'Commits (all)')
 nmap_leader('fC', '<Cmd>Pick git_commits path="%"<CR>',         'Commits (buf)')
 nmap_leader('fd', '<Cmd>Pick diagnostic scope="all"<CR>',       'Diagnostic workspace')
 nmap_leader('fD', '<Cmd>Pick diagnostic scope="current"<CR>',   'Diagnostic buffer')
+nmap_leader('fe', pick_git_status,                              'Files')
 nmap_leader('ff', pick_file,                                    'Files')
 nmap_leader('fg', '<Cmd>Pick grep_live<CR>',                    'Grep live')
 nmap_leader('fG', '<Cmd>Pick grep pattern="<cword>"<CR>',       'Grep current word')
