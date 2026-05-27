@@ -73,6 +73,8 @@ nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"),
 nmap('<C-Space>', ':ToggleTerm<CR>',  'Toggle Terminal')
 map('t', '<C-Space>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
 
+nmap("dm", "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", "Del mark" )
+
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
 -- stylua: ignore start
