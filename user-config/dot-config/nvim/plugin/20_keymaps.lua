@@ -61,14 +61,10 @@ local function move_or_exec(dir, cmd)
   end
 end
 
-nmap('<C-w>h', move_or_exec( "h", "i3-msg focus left"),
-   'Move focus to the left window' )
-nmap('<C-w>l', move_or_exec( "l", "i3-msg focus right"),
-   'Move focus to the right window' )
-nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"),
-   'Move focus to the lower window' )
-nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"),
-   'Move focus to the upper window' )
+nmap('<C-w>h', move_or_exec( "h", "i3-msg focus left"), 'Move focus to the left window' )
+nmap('<C-w>l', move_or_exec( "l", "i3-msg focus right"), 'Move focus to the right window' )
+nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"), 'Move focus to the lower window' )
+nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"), 'Move focus to the upper window' )
 
 nmap('<C-Space>', ':ToggleTerm<CR>',  'Toggle Terminal')
 map('t', '<C-Space>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
@@ -298,6 +294,8 @@ nmap_leader('go', '<Cmd>lua MiniDiff.toggle_overlay()<CR>', 'Toggle overlay')
 nmap_leader('gp', git_push,                                 'Push changes')
 nmap_leader('gP', git_pull,                                 'Pull changes')
 nmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
+nmap_leader('gu', '<Cmd>Git restore --staged %<CR>',        'Unstage current file')
+nmap_leader('gU', '<Cmd>Git restore --staged .<CR>',        'Unstage all files')
 
 xmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at selection')
 
