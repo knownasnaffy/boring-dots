@@ -283,7 +283,7 @@ nmap_leader('ga', '<Cmd>Git add %<CR>',                     'Stage current file'
 nmap_leader('gA', '<Cmd>Git add .<CR>',                     'Stage all files')
 nmap_leader('gbl', '<Cmd>'.. git_local_branches .. '<CR>',  'Local')
 nmap_leader('gbr', '<Cmd>'.. git_remote_branches .. '<CR>', 'Remotes')
-nmap_leader('gb', '<Cmd>lua Snacks.gitbrowse()<CR>',        'Browse remote')
+nmap_leader('gB', '<Cmd>lua Snacks.gitbrowse()<CR>',        'Browse remote')
 nmap_leader('gc', git_commit_with_msg,                      'Commit')
 nmap_leader('gC', '<Cmd>Git commit --amend --no-edit<CR>',  'Commit amend')
 nmap_leader('gd', '<Cmd>Git diff<CR>',                      'Diff')
