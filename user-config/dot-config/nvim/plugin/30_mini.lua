@@ -207,24 +207,317 @@ now(function() require('mini.tabline').setup({
 -- - `:h MiniFiles-examples` - examples of common setups
 now_if_args(function()
   -- Enable directory/file preview
-  require('mini.files').setup({
-    windows = { preview = true },
+  local MiniFiles = require('mini.files')
+
+  MiniFiles.setup({
+    windows = { preview = false, width_preview = 100 },
     mappings = {
       go_in       = 'L',
       go_in_plus  = 'l',
+      mark_set    = 'M',
     }
   })
 
-  -- Add common bookmarks for every explorer. Example usage inside explorer:
-  -- - `'c` to navigate into your config directory
-  -- - `g?` to see available bookmarks
-  local add_marks = function()
-    MiniFiles.set_bookmark('c', vim.fn.stdpath('config'), { desc = 'Config' })
-    local vimpack_plugins = vim.fn.stdpath('data') .. '/site/pack/core/opt'
-    MiniFiles.set_bookmark('p', vimpack_plugins, { desc = 'Plugins' })
-    MiniFiles.set_bookmark('w', vim.fn.getcwd, { desc = 'Working directory' })
+  -- Credits for the following mini.files features: https://github.com/drowning-cat/nvim/blob/main/plugin/30_mini_files.lua
+  local buf_get_path = function(buf)
+    local path = vim.api.nvim_buf_get_name(buf):match("^minifiles://%d+/(.*)$")
+    local stat = vim.uv.fs_stat(path)
+    return path, stat
   end
-  Config.new_autocmd('User', 'MiniFilesExplorerOpen', add_marks, 'Add bookmarks')
+
+  local set_cursor_path = function(win, path)
+    win = win or 0
+    local buf = vim.api.nvim_win_get_buf(win)
+    for i = 1, vim.api.nvim_buf_line_count(buf) do
+      if MiniFiles.get_fs_entry(buf, i).path == path then
+        vim.api.nvim_win_set_cursor(win, { i, 0 })
+        break
+      end
+    end
+  end
+
+  local get_preview_win = function()
+    if not MiniFiles.config.windows.preview then
+      return
+    end
+    local ok, state = pcall(MiniFiles.get_explorer_state)
+    if not ok or not state then
+      return
+    end
+    local rmost_win = state.windows[#state.windows].win_id
+    if rmost_win == vim.api.nvim_get_current_win() then
+      return
+    end
+    return state.windows[#state.windows].win_id
+  end
+
+  local preview_win_call = function(callback)
+    local win = get_preview_win()
+    if win then
+      vim.api.nvim_win_call(win, callback)
+    end
+  end
+
+  local get_selected = function()
+    local mode = vim.api.nvim_get_mode().mode
+    local is_visual = mode == "v" or mode == "V" or mode == vim.keycode("<C-v>")
+    local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+    local ln_range = { row, row }
+    if is_visual then
+      local row_start, row_end = row, vim.fn.line("v")
+      ln_range = { math.min(row_start, row_end), math.max(row_start, row_end) }
+    end
+    local selected = {}
+    for ln = ln_range[1], ln_range[2] do
+      local fs_entry = MiniFiles.get_fs_entry(0, ln)
+      if fs_entry then
+        table.insert(selected, fs_entry)
+      end
+    end
+    return selected
+  end
+
+  local ui_open = function()
+    vim.ui.open(MiniFiles.get_fs_entry().path)
+  end
+
+  local yank_path = function(mode)
+    mode = mode or "absolute"
+
+    vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
+
+    local register = vim.v.register
+    local selected = get_selected()
+    local notify = vim.schedule_wrap(vim.notify)
+
+    if vim.tbl_isempty(selected) then
+      notify("No paths to yank", vim.log.levels.WARN)
+      return
+    end
+
+    local paths = vim.iter(selected):map(function(fs_entry)
+      if mode == "relative" then
+        return vim.fn.fnamemodify(fs_entry.path, ":.")
+      end
+
+      return fs_entry.path
+    end):totable()
+
+    local copy_str = table.concat(paths, "\n")
+
+    vim.fn.setreg(register, copy_str)
+
+    notify(
+      string.format(
+        "Yanked %d %s (%s)",
+        #selected,
+        #selected == 1 and "path" or "paths",
+        mode
+      )
+    )
+  end
+
+  local toggle_preview = function()
+    local is_preview = MiniFiles.config.windows.preview
+    local is_preview_next = not is_preview
+    MiniFiles.config.windows.preview = is_preview_next
+    MiniFiles.trim_right()
+    MiniFiles.refresh({ windows = { preview = is_preview_next } })
+    if is_preview then
+      local branch = MiniFiles.get_explorer_state().branch
+      table.remove(branch)
+      MiniFiles.set_branch(branch)
+    end
+  end
+
+  local norm_in_preview = function(keys)
+    preview_win_call(function()
+      local key = vim.api.nvim_replace_termcodes(keys, true, false, true)
+      vim.cmd.norm({ key, bang = true })
+    end)
+  end
+
+  local search_grep = function()
+    local MiniPick = require("mini.pick")
+    local entry = MiniFiles.get_fs_entry()
+    if not entry then
+      return
+    end
+    local parent = vim.fn.fnamemodify(entry.path, ":h")
+    MiniFiles.close()
+    vim.notify(parent)
+    MiniPick.builtin.grep_live({}, { source = { cwd = parent } })
+  end
+
+  local search_files = function()
+    local MiniPick = require("mini.pick")
+    local entry = MiniFiles.get_fs_entry()
+    if not entry then
+      return
+    end
+    local parent = vim.fn.fnamemodify(entry.path, ":h")
+    MiniFiles.close()
+    MiniPick.builtin.files({}, { source = { cwd = parent } })
+  end
+
+  local set_bookmark = function(id, local_path, opts)
+    MiniFiles.set_bookmark(id, function()
+      local path = type(local_path) == "function" and local_path() or local_path
+      if type(path) ~= "string" then
+        return
+      end
+      path = vim.fs.abspath(path)
+      local stat = vim.uv.fs_stat(path)
+      if not stat then
+        return
+      end
+      vim.schedule(function()
+        set_cursor_path(0, path)
+      end)
+      return vim.fs.dirname(path)
+    end, opts)
+  end
+
+  local mark_set = function()
+    local id = vim.fn.getcharstr()
+    if not id or id == "" or id == "\27" then
+      return
+    end
+    local path = MiniFiles.get_fs_entry().path
+    set_bookmark(id, path)
+    vim.notify("Bookmark " .. vim.inspect(id) .. " is set")
+  end
+
+  local mark_goto = function() -- Copied from mini.files ditto
+    local id = vim.fn.getcharstr()
+    if id == nil then return end
+    local data = MiniFiles.get_explorer_state().bookmarks[id]
+    if data == nil then return vim.notify('No bookmark with id ' .. vim.inspect(id), vim.log.levels.WARN) end
+
+    local path = data.path
+    if vim.is_callable(path) then path = path() end
+
+    local fs_is_imaginary_path = function(target_path) return target_path:sub(-1) == '\000' end
+    local fs_is_present_path = function(target_path) return vim.loop.fs_stat(target_path) ~= nil and not fs_is_imaginary_path(target_path) end
+    local fs_get_type = function(target_path)
+      if not (not fs_is_imaginary_path(target_path) and fs_is_present_path(target_path)) then return nil end
+      return vim.fn.isdirectory(target_path) == 1 and 'directory' or 'file'
+    end
+
+    local is_valid_path = type(path) == 'string' and fs_get_type(vim.fn.expand(path)) == 'directory'
+    if not is_valid_path then return vim.notify('Bookmark path should be a valid path to directory', vim.log.levels.WARN) end
+
+    local state = MiniFiles.get_explorer_state()
+    if not state then
+      return
+    end
+    MiniFiles.set_bookmark("'", state.branch[state.depth_focus], { desc = 'Before latest jump' })
+    MiniFiles.set_branch({ path })
+  end
+
+  local define_bookmarks = function()
+    local target_win = MiniFiles.get_explorer_state().target_window
+    local target_buf = vim.api.nvim_win_get_buf(target_win)
+    set_bookmark("t", vim.api.nvim_buf_get_name(target_buf), { desc = "Target file" })
+    set_bookmark("n", vim.fn.stdpath("config") .. "/init.lua", { desc = "Neovim Config" })
+    set_bookmark("p", vim.fn.stdpath("data") .. "/site/pack/core/opt", { desc = "Plugins" })
+    -- This bookmark will take us inside the directory whereas the ones above will just make the targets focused
+    MiniFiles.set_bookmark("w", vim.fn.getcwd, { desc = "Cwd" })
+    MiniFiles.set_bookmark("c", vim.fn.expand('~/boring-dots'), { desc = "System Config" })
+  end
+
+  Config.new_autocmd('User', 'MiniFilesExplorerOpen', define_bookmarks, 'Add bookmarks')
+
+  local integrate_mini_clue = function(e)
+      if MiniClue then
+        MiniClue.ensure_buf_triggers(e.data.buf_id)
+      end
+    end
+
+  Config.new_autocmd('User', 'MiniFilesBufferCreate', integrate_mini_clue, 'Make mini.clue work with mini.files')
+
+  local define_keymaps = function(e)
+      local buf_map = function(mode, lhs, rhs, opts)
+        vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("keep", opts or {}, { buffer = e.data.buf_id }))
+      end
+      -- stylua: ignore start
+      buf_map("n", "'", function() mark_goto() end, { desc = "Set mark" }) -- Got overriden for some reason, so defined again
+      buf_map("n", "m", function() mark_set() end, { desc = "Set mark" })
+      buf_map("n", "gx", function() ui_open() end, { desc = "OS open" })
+      buf_map({ "n", "v" }, "yfr", function() yank_path("relative") end, { desc = "Yank path (relative)" })
+      buf_map({ "n", "v" }, "yfa", function() yank_path("absolute") end, { desc = "Yank path (absolute)" })
+      buf_map("n", "<C-Space>", function() toggle_preview() end, { desc = "Toggle preview" })
+      buf_map("n", "<C-b>", function() norm_in_preview("<C-u>") end, { desc = "Scroll preview backwards" })
+      buf_map("n", "<C-f>", function() norm_in_preview("<C-d>") end, { desc = "Scroll preview upwards" })
+      buf_map("n", "<Leader>fg", function() search_grep() end, { desc = "Search grep" })
+      buf_map("n", "<Leader>ff", function() search_files() end, { desc = "Search files" })
+    end
+
+  Config.new_autocmd('User', 'MiniFilesBufferCreate', define_keymaps, 'Define mini.files buffer keymaps')
+
+  local validate_file = function(path)
+    local fd, _, err = vim.uv.fs_open(path, "r", 1)
+    if not fd then
+      return err, nil
+    end
+    local is_binary = vim.uv.fs_read(fd, 1024):find("\0") ~= nil
+    vim.uv.fs_close(fd)
+    return false, is_binary
+  end
+
+  local files_preview_ns = vim.api.nvim_create_namespace("minifiles")
+
+  local extend_preview_lines = function(args)
+    local buf = args.data.buf_id
+    local path, stat = buf_get_path(buf)
+    if not stat or stat.type == "directory" then
+      return
+    end
+    local extm_id = 1
+    local error = function(msg)
+      local hl = "Text"
+      vim.treesitter.stop(buf)
+      vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
+      vim.api.nvim_buf_set_extmark(buf, files_preview_ns, 0, 0, {
+        id = extm_id,
+        virt_text_pos = "overlay",
+        virt_text = { { msg, hl } },
+      })
+    end
+    local warn = function(msg)
+      local hl = "WarningMsg"
+      vim.api.nvim_buf_set_extmark(buf, files_preview_ns, 0, 0, {
+        id = extm_id,
+        virt_text_pos = "right_align",
+        virt_text = { { msg, hl } },
+      })
+    end
+    local no_access, is_binary = validate_file(path)
+    local format_msg = function(msg)
+      msg = " " .. msg .. string.rep(" ", MiniFiles.config.windows.width_preview)
+      return string.gsub(msg, " ", "-")
+    end
+    if no_access then
+      error(format_msg("No access"))
+      return
+    end
+    if is_binary then
+      error(format_msg("Non text file"))
+      return
+    end
+    if stat.size > 512 * 1024 then
+      warn("Large file detected (>512KB)")
+      return
+    end
+    local read_ok, read_lines = pcall(vim.fn.readfile, path, "")
+    if read_ok then
+      local lines = vim.split(table.concat(read_lines, "\n"), "\n")
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    end
+  end
+
+  -- Extend `mini.files` preview lines; adjust preview error display
+  Config.new_autocmd("User", "MiniFilesBufferUpdate", extend_preview_lines, "Extend preview lines")
 end)
 
 -- Miscellaneous small but useful functions. Example usage:
