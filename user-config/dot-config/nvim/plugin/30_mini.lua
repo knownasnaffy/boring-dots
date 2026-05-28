@@ -819,7 +819,6 @@ later(function()
         vim.api.nvim_win_set_config(state.win_id, preview_config)
       end
 
-      vim.schedule(vim.cmd.redraw)
       local current_item = MiniPick.get_picker_matches().current
       if current_item ~= state.last_item then
         state.last_item = current_item
@@ -827,6 +826,12 @@ later(function()
         vim.api.nvim_win_set_buf(state.win_id, state.buf_id)
         show_preview(current_item)
       end
+
+      vim.schedule(vim.cmd.redraw) -- For previewrs that output the result instantly, like file previews with fast treesitter parsers
+      -- For previewers that take their sweet time, like `git diff`
+      vim.defer_fn(function()
+        vim.schedule(vim.cmd.redraw)
+      end, 200)
     end
 
     local function toggle()
