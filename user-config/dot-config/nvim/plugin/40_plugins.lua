@@ -277,7 +277,6 @@ now(function()
       left = { "mark", "git" }, -- priority of signs on the left (high to low)
       right = { "fold", "sign" }, -- priority of signs on the right (high to low)
     },
-    scope = {},
   })
 
   vim.api.nvim_create_autocmd("User", {
