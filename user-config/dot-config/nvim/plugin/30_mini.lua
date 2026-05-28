@@ -559,10 +559,11 @@ end)
 later(function()
   local jump2d = require('mini.jump2d')
   jump2d.setup({
+    labels = "abfhijklnoprsvw",
     spotter = jump2d.gen_spotter.union(jump2d.builtin_opts.line_start.spotter, jump2d.builtin_opts.word_start.spotter),
     view = {
       dim = true,
-      n_steps_ahead = 2
+      n_steps_ahead = 3
     },
   })
 end)
