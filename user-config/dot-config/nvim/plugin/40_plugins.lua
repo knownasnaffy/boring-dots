@@ -10,7 +10,8 @@
 
 -- Make concise helpers for installing/adding plugins in two stages
 local add = vim.pack.add
-local now, now_if_args, later, on_filetype = Config.now, Config.now_if_args, Config.later, Config.on_filetype
+local now, now_if_args, later, on_filetype =
+  Config.now, Config.now_if_args, Config.later, Config.on_filetype
 
 -- Tree-sitter ================================================================
 
@@ -51,35 +52,35 @@ now_if_args(function()
   -- After changing this, restart Neovim once to install necessary parsers. Wait
   -- for the installation to finish before opening a file for added language(s).
   local languages = {
-    "bash",
-    "comment",
-    "css",
-    "diff",
-    "dockerfile",
-    "elixir",
-    "git_config",
-    "gitcommit",
-    "gitignore",
-    "html",
-    "http",
-    "javascript",
-    "json",
-    "json5",
-    "lua",
-    "make",
-    "markdown",
-    "markdown_inline",
-    "python",
-    "regex",
-    "rust",
-    "ssh_config",
-    "sql",
-    "toml",
-    "tsx",
-    "typescript",
-    "vim",
-    "vimdoc",
-    "yaml",
+    'bash',
+    'comment',
+    'css',
+    'diff',
+    'dockerfile',
+    'elixir',
+    'git_config',
+    'gitcommit',
+    'gitignore',
+    'html',
+    'http',
+    'javascript',
+    'json',
+    'json5',
+    'lua',
+    'make',
+    'markdown',
+    'markdown_inline',
+    'python',
+    'regex',
+    'rust',
+    'ssh_config',
+    'sql',
+    'toml',
+    'tsx',
+    'typescript',
+    'vim',
+    'vimdoc',
+    'yaml',
     -- Add here more languages with which you want to use tree-sitter
     -- To see available languages:
     -- - Execute `:=require('nvim-treesitter').get_available()`
@@ -128,8 +129,8 @@ now_if_args(function()
     'https://github.com/mason-org/mason-lspconfig.nvim',
     {
       src = 'https://github.com/Saghen/blink.cmp',
-      version = 'v1'
-    }
+      version = 'v1',
+    },
   })
 
   require('mason').setup()
@@ -137,7 +138,7 @@ now_if_args(function()
   local ensure_installed = {
     'lua_ls',
     'tailwindcss',
-    'vtsls'
+    'vtsls',
   }
 
   local capabilities = require('blink.cmp').get_lsp_capabilities()
@@ -146,20 +147,21 @@ now_if_args(function()
     vim.lsp.config(lsp, { capabilities = capabilities })
   end
 
-  require("mason-lspconfig").setup({
+  require('mason-lspconfig').setup({
     automatic_enable = true,
-    ensure_installed = ensure_installed
+    ensure_installed = ensure_installed,
   })
 end)
-
 
 -- Completion =================================================================
 
 now_if_args(function()
-  add({{
-    src = 'https://github.com/Saghen/blink.cmp',
-    version = 'v1'
-  }})
+  add({
+    {
+      src = 'https://github.com/Saghen/blink.cmp',
+      version = 'v1',
+    },
+  })
 
   local opts = {
     -- C-space: Open menu or toggle docs if already open
@@ -176,7 +178,7 @@ now_if_args(function()
     appearance = {
       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
-      nerd_font_variant = 'mono'
+      nerd_font_variant = 'mono',
     },
 
     -- (Default) Only show the documentation popup when manually triggered
@@ -185,8 +187,8 @@ now_if_args(function()
       list = { selection = { preselect = false } },
       ghost_text = {
         enabled = true,
-        show_with_menu = false
-      }
+        show_with_menu = false,
+      },
     },
 
     -- Default list of enabled providers defined so that you can extend it
@@ -195,7 +197,7 @@ now_if_args(function()
       default = { 'lsp', 'path', 'snippets', 'buffer' },
       per_filetype = {
         -- optionally inherit from the `default` sources
-        lua = { inherit_defaults = true, 'lazydev' }
+        lua = { inherit_defaults = true, 'lazydev' },
       },
       providers = {
         lazydev = {
@@ -204,10 +206,7 @@ now_if_args(function()
           -- make lazydev completions top priority (see `:h blink.cmp`)
           score_offset = 100,
           should_show_items = function()
-            return vim.tbl_contains(
-              { 'lua' },
-              vim.o.filetype
-            )
+            return vim.tbl_contains({ 'lua' }, vim.o.filetype)
           end,
         },
       },
@@ -220,7 +219,7 @@ now_if_args(function()
     -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
     --
     -- See the fuzzy documentation for more information
-    fuzzy = { implementation = "prefer_rust_with_warning" }
+    fuzzy = { implementation = 'prefer_rust_with_warning' },
   }
 
   require('blink.cmp').setup(opts)
@@ -263,24 +262,23 @@ end)
 -- See `:h MiniSnippets.gen_loader.from_lang()`.
 later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 
-
 -- Snacks =====================================================================
 now(function()
-  add({'https://github.com/folke/snacks.nvim'})
+  add({ 'https://github.com/folke/snacks.nvim' })
   local snacks = require('snacks')
   snacks.setup({
     gitbrowse = {
-      what = "branch"
+      what = 'branch',
     },
     quickfile = { enabled = true },
     statuscolumn = {
-      left = { "mark", "git" }, -- priority of signs on the left (high to low)
-      right = { "fold", "sign" }, -- priority of signs on the right (high to low)
+      left = { 'mark', 'git' }, -- priority of signs on the left (high to low)
+      right = { 'fold', 'sign' }, -- priority of signs on the right (high to low)
     },
   })
 
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniFilesActionRename",
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniFilesActionRename',
     callback = function(event)
       snacks.rename.on_rename_file(event.data.from, event.data.to)
     end,
@@ -288,7 +286,7 @@ now(function()
 end)
 
 later(function()
-  add({'https://github.com/akinsho/toggleterm.nvim'})
+  add({ 'https://github.com/akinsho/toggleterm.nvim' })
   require('toggleterm').setup({--[[ things you want to change go here]]
     size = function(term)
       if term.direction == 'horizontal' then
@@ -307,13 +305,13 @@ later(function()
 end)
 
 on_filetype('lua', function()
-  add({'https://github.com/folke/lazydev.nvim'})
+  add({ 'https://github.com/folke/lazydev.nvim' })
 
   local opts = {
     library = {
       -- See the configuration section for more details
       -- Load luvit types when the `vim.uv` word is found
-      { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
     },
   }
 

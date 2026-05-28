@@ -43,8 +43,7 @@ now(function()
   require('mini.basics').setup({
     -- Manage options in 'plugin/10_options.lua' for didactic purposes
     options = { basic = false },
-    mappings = {
-    },
+    mappings = {},
   })
 end)
 
@@ -110,11 +109,13 @@ now(function() require('mini.statusline').setup() end)
 
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
-now(function() require('mini.tabline').setup({
-  format = function(buf_id, label)
-    return string.format(" [%d] %s ", buf_id, label)
-  end
-}) end)
+now(function()
+  require('mini.tabline').setup({
+    format = function(buf_id, label)
+      return string.format(' [%d] %s ', buf_id, label)
+    end,
+  })
+end)
 
 -- Step one or two ============================================================
 -- Load now if Neovim is started like `nvim -- path/to/file`, otherwise - later.
@@ -212,15 +213,15 @@ now_if_args(function()
   MiniFiles.setup({
     windows = { preview = false, width_preview = 100 },
     mappings = {
-      go_in       = 'L',
-      go_in_plus  = 'l',
-      mark_set    = 'M',
-    }
+      go_in = 'L',
+      go_in_plus = 'l',
+      mark_set = 'M',
+    },
   })
 
   -- Credits for the following mini.files features: https://github.com/drowning-cat/nvim/blob/main/plugin/30_mini_files.lua
   local buf_get_path = function(buf)
-    local path = vim.api.nvim_buf_get_name(buf):match("^minifiles://%d+/(.*)$")
+    local path = vim.api.nvim_buf_get_name(buf):match('^minifiles://%d+/(.*)$')
     local stat = vim.uv.fs_stat(path)
     return path, stat
   end
@@ -237,81 +238,72 @@ now_if_args(function()
   end
 
   local get_preview_win = function()
-    if not MiniFiles.config.windows.preview then
-      return
-    end
+    if not MiniFiles.config.windows.preview then return end
     local ok, state = pcall(MiniFiles.get_explorer_state)
-    if not ok or not state then
-      return
-    end
+    if not ok or not state then return end
     local rmost_win = state.windows[#state.windows].win_id
-    if rmost_win == vim.api.nvim_get_current_win() then
-      return
-    end
+    if rmost_win == vim.api.nvim_get_current_win() then return end
     return state.windows[#state.windows].win_id
   end
 
   local preview_win_call = function(callback)
     local win = get_preview_win()
-    if win then
-      vim.api.nvim_win_call(win, callback)
-    end
+    if win then vim.api.nvim_win_call(win, callback) end
   end
 
   local get_selected = function()
     local mode = vim.api.nvim_get_mode().mode
-    local is_visual = mode == "v" or mode == "V" or mode == vim.keycode("<C-v>")
+    local is_visual = mode == 'v' or mode == 'V' or mode == vim.keycode('<C-v>')
     local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
     local ln_range = { row, row }
     if is_visual then
-      local row_start, row_end = row, vim.fn.line("v")
+      local row_start, row_end = row, vim.fn.line('v')
       ln_range = { math.min(row_start, row_end), math.max(row_start, row_end) }
     end
     local selected = {}
     for ln = ln_range[1], ln_range[2] do
       local fs_entry = MiniFiles.get_fs_entry(0, ln)
-      if fs_entry then
-        table.insert(selected, fs_entry)
-      end
+      if fs_entry then table.insert(selected, fs_entry) end
     end
     return selected
   end
 
-  local ui_open = function()
-    vim.ui.open(MiniFiles.get_fs_entry().path)
-  end
+  local ui_open = function() vim.ui.open(MiniFiles.get_fs_entry().path) end
 
   local yank_path = function(mode)
-    mode = mode or "absolute"
+    mode = mode or 'absolute'
 
-    vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
+    vim.api.nvim_feedkeys(vim.keycode('<Esc>'), 'n', false)
 
     local register = vim.v.register
     local selected = get_selected()
     local notify = vim.schedule_wrap(vim.notify)
 
     if vim.tbl_isempty(selected) then
-      notify("No paths to yank", vim.log.levels.WARN)
+      notify('No paths to yank', vim.log.levels.WARN)
       return
     end
 
-    local paths = vim.iter(selected):map(function(fs_entry)
-      if mode == "relative" then
-        return vim.fn.fnamemodify(fs_entry.path, ":.")
-      end
+    local paths = vim
+      .iter(selected)
+      :map(function(fs_entry)
+        if mode == 'relative' then
+          return vim.fn.fnamemodify(fs_entry.path, ':.')
+        end
 
-      return fs_entry.path
-    end):totable()
+        return fs_entry.path
+      end)
+      :totable()
 
-    local copy_str = table.concat(paths, "\n")
+    local copy_str = table.concat(paths, '\n')
 
     vim.fn.setreg(register, copy_str)
 
     notify(
       string.format(
-        "Yanked %d %s (%s)",
+        'Yanked %d %s (%s)',
         #selected,
-        #selected == 1 and "path" or "paths",
+        #selected == 1 and 'path' or 'paths',
         mode
       )
     )
@@ -338,108 +330,150 @@ now_if_args(function()
   end
 
   local search_grep = function()
-    local MiniPick = require("mini.pick")
+    local MiniPick = require('mini.pick')
     local entry = MiniFiles.get_fs_entry()
-    if not entry then
-      return
-    end
-    local parent = vim.fn.fnamemodify(entry.path, ":h")
+    if not entry then return end
+    local parent = vim.fn.fnamemodify(entry.path, ':h')
     MiniFiles.close()
     vim.notify(parent)
     MiniPick.builtin.grep_live({}, { source = { cwd = parent } })
   end
 
   local search_files = function()
-    local MiniPick = require("mini.pick")
+    local MiniPick = require('mini.pick')
     local entry = MiniFiles.get_fs_entry()
-    if not entry then
-      return
-    end
-    local parent = vim.fn.fnamemodify(entry.path, ":h")
+    if not entry then return end
+    local parent = vim.fn.fnamemodify(entry.path, ':h')
     MiniFiles.close()
     MiniPick.builtin.files({}, { source = { cwd = parent } })
   end
 
   local set_bookmark = function(id, local_path, opts)
     MiniFiles.set_bookmark(id, function()
-      local path = type(local_path) == "function" and local_path() or local_path
-      if type(path) ~= "string" then
-        return
-      end
+      local path = type(local_path) == 'function' and local_path() or local_path
+      if type(path) ~= 'string' then return end
       path = vim.fs.abspath(path)
       local stat = vim.uv.fs_stat(path)
-      if not stat then
-        return
-      end
-      vim.schedule(function()
-        set_cursor_path(0, path)
-      end)
+      if not stat then return end
+      vim.schedule(function() set_cursor_path(0, path) end)
       return vim.fs.dirname(path)
     end, opts)
   end
 
   local mark_set = function()
     local id = vim.fn.getcharstr()
-    if not id or id == "" or id == "\27" then
-      return
-    end
+    if not id or id == '' or id == '\27' then return end
     local path = MiniFiles.get_fs_entry().path
     set_bookmark(id, path)
-    vim.notify("Bookmark " .. vim.inspect(id) .. " is set")
+    vim.notify('Bookmark ' .. vim.inspect(id) .. ' is set')
   end
 
   local mark_goto = function() -- Copied from mini.files ditto
     local id = vim.fn.getcharstr()
     if id == nil then return end
     local data = MiniFiles.get_explorer_state().bookmarks[id]
-    if data == nil then return vim.notify('No bookmark with id ' .. vim.inspect(id), vim.log.levels.WARN) end
+    if data == nil then
+      return vim.notify(
+        'No bookmark with id ' .. vim.inspect(id),
+        vim.log.levels.WARN
+      )
+    end
 
     local path = data.path
     if vim.is_callable(path) then path = path() end
 
-    local fs_is_imaginary_path = function(target_path) return target_path:sub(-1) == '\000' end
-    local fs_is_present_path = function(target_path) return vim.loop.fs_stat(target_path) ~= nil and not fs_is_imaginary_path(target_path) end
+    local fs_is_imaginary_path = function(target_path)
+      return target_path:sub(-1) == '\000'
+    end
+    local fs_is_present_path = function(target_path)
+      return vim.loop.fs_stat(target_path) ~= nil
+        and not fs_is_imaginary_path(target_path)
+    end
     local fs_get_type = function(target_path)
-      if not (not fs_is_imaginary_path(target_path) and fs_is_present_path(target_path)) then return nil end
+      if
+        not (
+          not fs_is_imaginary_path(target_path)
+          and fs_is_present_path(target_path)
+        )
+      then
+        return nil
+      end
       return vim.fn.isdirectory(target_path) == 1 and 'directory' or 'file'
     end
 
-    local is_valid_path = type(path) == 'string' and fs_get_type(vim.fn.expand(path)) == 'directory'
-    if not is_valid_path then return vim.notify('Bookmark path should be a valid path to directory', vim.log.levels.WARN) end
+    local is_valid_path = type(path) == 'string'
+      and fs_get_type(vim.fn.expand(path)) == 'directory'
+    if not is_valid_path then
+      return vim.notify(
+        'Bookmark path should be a valid path to directory',
+        vim.log.levels.WARN
+      )
+    end
 
     local state = MiniFiles.get_explorer_state()
-    if not state then
-      return
-    end
-    MiniFiles.set_bookmark("'", state.branch[state.depth_focus], { desc = 'Before latest jump' })
+    if not state then return end
+    MiniFiles.set_bookmark(
+      "'",
+      state.branch[state.depth_focus],
+      { desc = 'Before latest jump' }
+    )
     MiniFiles.set_branch({ path })
   end
 
   local define_bookmarks = function()
     local target_win = MiniFiles.get_explorer_state().target_window
     local target_buf = vim.api.nvim_win_get_buf(target_win)
-    set_bookmark("t", vim.api.nvim_buf_get_name(target_buf), { desc = "Target file" })
-    set_bookmark("n", vim.fn.stdpath("config") .. "/init.lua", { desc = "Neovim Config" })
-    set_bookmark("p", vim.fn.stdpath("data") .. "/site/pack/core/opt", { desc = "Plugins" })
+    set_bookmark(
+      't',
+      vim.api.nvim_buf_get_name(target_buf),
+      { desc = 'Target file' }
+    )
+    set_bookmark(
+      'n',
+      vim.fn.stdpath('config') .. '/init.lua',
+      { desc = 'Neovim Config' }
+    )
+    set_bookmark(
+      'p',
+      vim.fn.stdpath('data') .. '/site/pack/core/opt',
+      { desc = 'Plugins' }
+    )
     -- This bookmark will take us inside the directory whereas the ones above will just make the targets focused
-    MiniFiles.set_bookmark("w", vim.fn.getcwd, { desc = "Cwd" })
-    MiniFiles.set_bookmark("c", vim.fn.expand('~/boring-dots'), { desc = "System Config" })
+    MiniFiles.set_bookmark('w', vim.fn.getcwd, { desc = 'Cwd' })
+    MiniFiles.set_bookmark(
+      'c',
+      vim.fn.expand('~/boring-dots'),
+      { desc = 'System Config' }
+    )
   end
 
-  Config.new_autocmd('User', 'MiniFilesExplorerOpen', define_bookmarks, 'Add bookmarks')
+  Config.new_autocmd(
+    'User',
+    'MiniFilesExplorerOpen',
+    define_bookmarks,
+    'Add bookmarks'
+  )
 
   local integrate_mini_clue = function(e)
-      if MiniClue then
-        MiniClue.ensure_buf_triggers(e.data.buf_id)
-      end
-    end
+    if MiniClue then MiniClue.ensure_buf_triggers(e.data.buf_id) end
+  end
 
-  Config.new_autocmd('User', 'MiniFilesBufferCreate', integrate_mini_clue, 'Make mini.clue work with mini.files')
+  Config.new_autocmd(
+    'User',
+    'MiniFilesBufferCreate',
+    integrate_mini_clue,
+    'Make mini.clue work with mini.files'
+  )
 
   local define_keymaps = function(e)
-      local buf_map = function(mode, lhs, rhs, opts)
-        vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("keep", opts or {}, { buffer = e.data.buf_id }))
-      end
+    local buf_map = function(mode, lhs, rhs, opts)
+      vim.keymap.set(
+        mode,
+        lhs,
+        rhs,
+        vim.tbl_extend('keep', opts or {}, { buffer = e.data.buf_id })
+      )
+    end
       -- stylua: ignore start
       buf_map("n", "'", function() mark_goto() end, { desc = "Set mark" }) -- Got overriden for some reason, so defined again
       buf_map("n", "m", function() mark_set() end, { desc = "Set mark" })
@@ -451,73 +485,81 @@ now_if_args(function()
       buf_map("n", "<C-f>", function() norm_in_preview("<C-d>") end, { desc = "Scroll preview upwards" })
       buf_map("n", "<Leader>fg", function() search_grep() end, { desc = "Search grep" })
       buf_map("n", "<Leader>ff", function() search_files() end, { desc = "Search files" })
-    end
+  end
 
-  Config.new_autocmd('User', 'MiniFilesBufferCreate', define_keymaps, 'Define mini.files buffer keymaps')
+  Config.new_autocmd(
+    'User',
+    'MiniFilesBufferCreate',
+    define_keymaps,
+    'Define mini.files buffer keymaps'
+  )
 
   local validate_file = function(path)
-    local fd, _, err = vim.uv.fs_open(path, "r", 1)
-    if not fd then
-      return err, nil
-    end
-    local is_binary = vim.uv.fs_read(fd, 1024):find("\0") ~= nil
+    local fd, _, err = vim.uv.fs_open(path, 'r', 1)
+    if not fd then return err, nil end
+    local is_binary = vim.uv.fs_read(fd, 1024):find('\0') ~= nil
     vim.uv.fs_close(fd)
     return false, is_binary
   end
 
-  local files_preview_ns = vim.api.nvim_create_namespace("minifiles")
+  local files_preview_ns = vim.api.nvim_create_namespace('minifiles')
 
   local extend_preview_lines = function(args)
     local buf = args.data.buf_id
     local path, stat = buf_get_path(buf)
-    if not stat or stat.type == "directory" then
-      return
-    end
+    if not stat or stat.type == 'directory' then return end
     local extm_id = 1
     local error = function(msg)
-      local hl = "Text"
+      local hl = 'Text'
       vim.treesitter.stop(buf)
       vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
       vim.api.nvim_buf_set_extmark(buf, files_preview_ns, 0, 0, {
         id = extm_id,
-        virt_text_pos = "overlay",
+        virt_text_pos = 'overlay',
         virt_text = { { msg, hl } },
       })
     end
     local warn = function(msg)
-      local hl = "WarningMsg"
+      local hl = 'WarningMsg'
       vim.api.nvim_buf_set_extmark(buf, files_preview_ns, 0, 0, {
         id = extm_id,
-        virt_text_pos = "right_align",
+        virt_text_pos = 'right_align',
         virt_text = { { msg, hl } },
       })
     end
     local no_access, is_binary = validate_file(path)
     local format_msg = function(msg)
-      msg = " " .. msg .. string.rep(" ", MiniFiles.config.windows.width_preview)
-      return string.gsub(msg, " ", "-")
+      msg = ' '
+        .. msg
+        .. string.rep(' ', MiniFiles.config.windows.width_preview)
+      return string.gsub(msg, ' ', '-')
     end
     if no_access then
-      error(format_msg("No access"))
+      error(format_msg('No access'))
       return
     end
     if is_binary then
-      error(format_msg("Non text file"))
+      error(format_msg('Non text file'))
       return
     end
     if stat.size > 512 * 1024 then
-      warn("Large file detected (>512KB)")
+      warn('Large file detected (>512KB)')
       return
     end
-    local read_ok, read_lines = pcall(vim.fn.readfile, path, "")
+    local read_ok, read_lines = pcall(vim.fn.readfile, path, '')
     if read_ok then
-      local lines = vim.split(table.concat(read_lines, "\n"), "\n")
+      local lines = vim.split(table.concat(read_lines, '\n'), '\n')
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
     end
   end
 
   -- Extend `mini.files` preview lines; adjust preview error display
-  Config.new_autocmd("User", "MiniFilesBufferUpdate", extend_preview_lines, "Extend preview lines")
+  Config.new_autocmd(
+    'User',
+    'MiniFilesBufferUpdate',
+    extend_preview_lines,
+    'Extend preview lines'
+  )
 end)
 
 -- Miscellaneous small but useful functions. Example usage:
@@ -582,7 +624,10 @@ later(function()
       -- For more complicated textobjects that require structural awareness,
       -- use tree-sitter. This example makes `aF`/`iF` mean around/inside function
       -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
-      F = ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
+      F = ai.gen_spec.treesitter({
+        a = '@function.outer',
+        i = '@function.inner',
+      }),
     },
 
     -- 'mini.ai' by default mostly mimics built-in search behavior: first try
@@ -745,12 +790,16 @@ later(function() require('mini.comment').setup() end)
 -- - `:h MiniDiff-overview` - overview of how module works
 -- - `:h MiniDiff-diff-summary` - available summary information
 -- - `:h MiniDiff.gen_source` - available built-in sources
-later(function() require('mini.diff').setup({
-  view = {
-    style = 'sign',
-    signs = { add = '▍', change = '▍', delete = '▍' },
-  }
-}) end)
+later(
+  function()
+    require('mini.diff').setup({
+      view = {
+        style = 'sign',
+        signs = { add = '▍', change = '▍', delete = '▍' },
+      },
+    })
+  end
+)
 
 -- Git integration for more straightforward Git actions based on Neovim's state.
 -- It is not meant as a fully featured Git client, only to provide helpers that
@@ -767,34 +816,32 @@ later(function() require('mini.diff').setup({
 later(function()
   require('mini.git').setup()
 
-  vim.cmd.cnoreabbrev("G", "Git")
-  vim.cmd.cnoreabbrev("Gc", "Git checkout")
-  vim.cmd.cnoreabbrev("Gca", "Git commit --amend")
+  vim.cmd.cnoreabbrev('G', 'Git')
+  vim.cmd.cnoreabbrev('Gc', 'Git checkout')
+  vim.cmd.cnoreabbrev('Gca', 'Git commit --amend')
 
   -- Git blame
 
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniGitCommandSplit",
-    group = vim.api.nvim_create_augroup("mini_gitblame", { clear = true }),
-    desc = "Enhance `Git blame`: colorize buffer and set width for vertical split",
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniGitCommandSplit',
+    group = vim.api.nvim_create_augroup('mini_gitblame', { clear = true }),
+    desc = 'Enhance `Git blame`: colorize buffer and set width for vertical split',
     callback = function(e)
-      if e.data.git_subcommand ~= "blame" then
-        return
-      end
+      if e.data.git_subcommand ~= 'blame' then return end
       local win_src = e.data.win_source
       local buf = e.buf
       local win = e.data.win_stdout
       vim.bo[buf].modifiable = false
       vim.wo[win].wrap = false
       vim.wo[win].cursorline = true
-      vim.fn.winrestview({ topline = vim.fn.line("w0", win_src) })
-      vim.api.nvim_win_set_cursor(0, { vim.fn.line(".", win_src), 0 })
+      vim.fn.winrestview({ topline = vim.fn.line('w0', win_src) })
+      vim.api.nvim_win_set_cursor(0, { vim.fn.line('.', win_src), 0 })
       vim.wo[win].scrollbind, vim.wo[win_src].scrollbind = true, true
       vim.wo[win].cursorbind, vim.wo[win_src].cursorbind = true, true
-      if string.match(e.data.cmd_input.mods, "vertical") then
+      if string.match(e.data.cmd_input.mods, 'vertical') then
         local lines = vim.api.nvim_buf_get_lines(0, 1, -1, false)
         local width = vim.iter(lines):fold(-1, function(acc, ln)
-          local stat = string.match(ln, "^[%w%p]+ %b()")
+          local stat = string.match(ln, '^[%w%p]+ %b()')
           return math.max(acc, vim.fn.strwidth(stat))
         end)
         width = width + vim.fn.getwininfo(win)[1].textoff
@@ -809,25 +856,28 @@ later(function()
     end,
   })
 
-  vim.api.nvim_create_user_command("GitBlame", function()
+  vim.api.nvim_create_user_command('GitBlame', function()
     local git_wins = vim
       .iter(vim.api.nvim_tabpage_list_wins(0))
       :filter(function(win)
         local buf = vim.api.nvim_win_get_buf(win)
-        return vim.bo[buf].ft == "git_blame"
+        return vim.bo[buf].ft == 'git_blame'
       end)
       :totable()
     if not vim.tbl_isempty(git_wins) then
-      vim.iter(git_wins):each(function(win)
-        vim.api.nvim_win_close(win, true)
-      end)
+      vim
+        .iter(git_wins)
+        :each(function(win) vim.api.nvim_win_close(win, true) end)
     else
       local open = function()
         vim.cmd([[vert above Git blame -- %]])
-        vim.bo.ft = "git_blame"
+        vim.bo.ft = 'git_blame'
       end
       if not pcall(open) then
-        vim.notify("[mini.git] Unable to open `:GitBlame` for the file", vim.log.levels.WARN)
+        vim.notify(
+          '[mini.git] Unable to open `:GitBlame` for the file',
+          vim.log.levels.WARN
+        )
       end
     end
   end, {})
@@ -843,41 +893,43 @@ later(function()
   local hipatterns = require('mini.hipatterns')
   local hi_words = MiniExtra.gen_highlighter.words
 
-  local perf_bg = vim.api.nvim_get_hl(0, { name = "@keyword", link = false }).fg
-  vim.api.nvim_set_hl(0, "HipatternsPerf", { bold = true, fg = "black", bg = perf_bg })
+  local perf_bg = vim.api.nvim_get_hl(0, { name = '@keyword', link = false }).fg
+  vim.api.nvim_set_hl(
+    0,
+    'HipatternsPerf',
+    { bold = true, fg = 'black', bg = perf_bg }
+  )
 
   hipatterns.setup({
     highlighters = {
       -- Highlight a fixed set of common words. Will be highlighted in any place,
       -- not like "only in comments".
-      fix = hi_words({ "FIX", "FIXME", "BUG" }, "MiniHipatternsFixme"),
-      note = hi_words({ "NOTE" }, "MiniHipatternsNote"),
-      todo = hi_words({ "TODO", "FEAT" }, "MiniHipatternsTodo"),
-      hack = hi_words({ "WARN", "WARNING", "HACK" }, "MiniHipatternsHack"),
-      perf = hi_words({ "PERF" }, "HipatternsPerf"),
+      fix = hi_words({ 'FIX', 'FIXME', 'BUG' }, 'MiniHipatternsFixme'),
+      note = hi_words({ 'NOTE' }, 'MiniHipatternsNote'),
+      todo = hi_words({ 'TODO', 'FEAT' }, 'MiniHipatternsTodo'),
+      hack = hi_words({ 'WARN', 'WARNING', 'HACK' }, 'MiniHipatternsHack'),
+      perf = hi_words({ 'PERF' }, 'HipatternsPerf'),
       -- Highlight hex color string (#aabbcc)
       hex_color = hipatterns.gen_highlighter.hex_color(),
       -- Highlight short hex color string (#000)
       hex_color_short = {
-        pattern = "()#%x%x%x()%f[^%x%w]",
+        pattern = '()#%x%x%x()%f[^%x%w]',
         group = function(_, _, data)
           local match = data.full_match
           local r, g, b = match:sub(2, 2), match:sub(3, 3), match:sub(4, 4)
-          local hex_color = "#" .. r .. r .. g .. g .. b .. b
-          return MiniHipatterns.compute_hex_color_group(hex_color, "bg")
+          local hex_color = '#' .. r .. r .. g .. g .. b .. b
+          return MiniHipatterns.compute_hex_color_group(hex_color, 'bg')
         end,
       },
       -- * { color: hsl(80, 80%, 50%) }
       hsl_color = {
         -- NOTE: Partial support for CSS hsl()
-        pattern = "hsl%(%d+[, ] ?%d+%%?[, ] ?%d+%%?%)",
+        pattern = 'hsl%(%d+[, ] ?%d+%%?[, ] ?%d+%%?%)',
         group = function(_, m, _)
           -- https://www.w3.org/TR/css-color-3/#hsl-color
           local function hsl_to_rgb(h, s, l)
             h, s, l = h % 360, s / 100, l / 100
-            if h < 0 then
-              h = h + 360
-            end
+            if h < 0 then h = h + 360 end
             local function f(n)
               local k = (n + h / 30) % 12
               local a = s * math.min(l, 1 - l)
@@ -885,9 +937,9 @@ later(function()
             end
             return f(0) * 255, f(8) * 255, f(4) * 255
           end
-          local h, s, l = m:match("(%d+)[, ] ?(%d+)%%?[, ] ?(%d+)%%?")
+          local h, s, l = m:match('(%d+)[, ] ?(%d+)%%?[, ] ?(%d+)%%?')
           local r, g, b = hsl_to_rgb(h, s, l)
-          local hex = string.format("#%02x%02x%02x", r, g, b)
+          local hex = string.format('#%02x%02x%02x', r, g, b)
           return MiniHipatterns.compute_hex_color_group(hex, 'bg')
         end,
       },
@@ -919,7 +971,7 @@ later(function()
       backward = 'F',
       forward_till = 't',
       backward_till = 'T',
-    }
+    },
   })
 
   local custom_jump = function(backward, till)
@@ -945,7 +997,6 @@ later(function()
   --            For the people who think they would've instead used $F'FhFd,
   --            instead of tinkering with the plugin setup, you might be more
   --            intelligent than me.
-
 end)
 
 -- Jump within visible lines to pre-defined spots via iterative label filtering.
@@ -961,15 +1012,18 @@ end)
 later(function()
   local jump2d = require('mini.jump2d')
   jump2d.setup({
-    labels = "abfhijklnoprsvw",
-    spotter = jump2d.gen_spotter.union(jump2d.builtin_opts.line_start.spotter, jump2d.builtin_opts.word_start.spotter),
+    labels = 'abfhijklnoprsvw',
+    spotter = jump2d.gen_spotter.union(
+      jump2d.builtin_opts.line_start.spotter,
+      jump2d.builtin_opts.word_start.spotter
+    ),
     view = {
       dim = true,
-      n_steps_ahead = 3
+      n_steps_ahead = 3,
     },
     mappings = {
-      start_jumping = "sj",
-    }
+      start_jumping = 'sj',
+    },
   })
 end)
 
@@ -1031,8 +1085,18 @@ later(function()
   -- - It overrides `:h (` and `:h )`.
   -- Explanation: `gx`-`ia`-`gx`-`ila` <=> exchange current and last argument
   -- Usage: when on `a` in `(aa, bb)` press `)` followed by `(`.
-  vim.keymap.set('n', '(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
-  vim.keymap.set('n', ')', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
+  vim.keymap.set(
+    'n',
+    '(',
+    'gxiagxila',
+    { remap = true, desc = 'Swap arg left' }
+  )
+  vim.keymap.set(
+    'n',
+    ')',
+    'gxiagxina',
+    { remap = true, desc = 'Swap arg right' }
+  )
 end)
 
 -- Autopairs functionality. Insert pair when typing opening character and go over
@@ -1048,15 +1112,20 @@ later(function()
   require('mini.pairs').setup({
     modes = { command = true },
     mappings = {
-      ["("] = { neigh_pattern = "[^\\][%s>)%]},:]" },
-      ["["] = { neigh_pattern = "[^\\][%s>)%]},:]" },
-      ["{"] = { neigh_pattern = "[^\\][%s>)%]},:]" },
-      ['"'] = { neigh_pattern = "[%s<(%[{][%s>)%]},:]" },
-      ["'"] = { neigh_pattern = "[%s<(%[{][%s>)%]},:]" },
-      ["`"] = { neigh_pattern = "[%s<(%[{][%s>)%]},:]" },
-      ["<"] = { action = "open", pair = "<>", neigh_pattern = "[\r%w\"'`].", register = { cr = false } },
-      [">"] = { action = "close", pair = "<>", register = { cr = false } },
-    }
+      ['('] = { neigh_pattern = '[^\\][%s>)%]},:]' },
+      ['['] = { neigh_pattern = '[^\\][%s>)%]},:]' },
+      ['{'] = { neigh_pattern = '[^\\][%s>)%]},:]' },
+      ['"'] = { neigh_pattern = '[%s<(%[{][%s>)%]},:]' },
+      ["'"] = { neigh_pattern = '[%s<(%[{][%s>)%]},:]' },
+      ['`'] = { neigh_pattern = '[%s<(%[{][%s>)%]},:]' },
+      ['<'] = {
+        action = 'open',
+        pair = '<>',
+        neigh_pattern = '[\r%w"\'`].',
+        register = { cr = false },
+      },
+      ['>'] = { action = 'close', pair = '<>', register = { cr = false } },
+    },
   })
 end)
 
@@ -1091,10 +1160,12 @@ end)
 --   one of `<Leader>f` mappings defined in 'plugin/20_keymaps.lua'
 later(function()
   local preview = (function()
-    local config = { orientation = "horizontal", ratio = 0.6 }
-    local state = { win_id = nil, buf_id = nil, last_item = nil, is_hidden = false }
+    local config = { orientation = 'horizontal', ratio = 0.6 }
+    local state =
+      { win_id = nil, buf_id = nil, last_item = nil, is_hidden = false }
     local cache = { win_config = {} }
-    local scroll_map = { up = "<C-b>", down = "<C-f>", left = "zH", right = "zL" }
+    local scroll_map =
+      { up = '<C-b>', down = '<C-f>', left = 'zH', right = 'zL' }
 
     local function reset()
       state.win_id = nil
@@ -1104,25 +1175,31 @@ later(function()
       cache.win_config = {}
     end
 
-    local function has_win() return state.win_id ~= nil and vim.api.nvim_win_is_valid(state.win_id) end
+    local function has_win()
+      return state.win_id ~= nil and vim.api.nvim_win_is_valid(state.win_id)
+    end
 
     local function create_buf()
       state.buf_id = vim.api.nvim_create_buf(false, true)
-      vim.api.nvim_buf_set_name(state.buf_id, "minipick://" .. state.buf_id .. "/preview")
-      vim.bo[state.buf_id].bufhidden = "wipe"
-      vim.bo[state.buf_id].matchpairs = ""
+      vim.api.nvim_buf_set_name(
+        state.buf_id,
+        'minipick://' .. state.buf_id .. '/preview'
+      )
+      vim.bo[state.buf_id].bufhidden = 'wipe'
+      vim.bo[state.buf_id].matchpairs = ''
       vim.b[state.buf_id].minicursorword_disable = true
       vim.b[state.buf_id].miniindentscope_disable = true
     end
 
     local function create_win(win_config)
-      win_config.style = "minimal"
+      win_config.style = 'minimal'
       state.win_id = vim.api.nvim_open_win(state.buf_id, false, win_config)
       vim.wo[state.win_id].foldenable = false
-      vim.wo[state.win_id].foldmethod = "manual"
+      vim.wo[state.win_id].foldmethod = 'manual'
       vim.wo[state.win_id].linebreak = true
       vim.wo[state.win_id].scrolloff = 0
-      vim.wo[state.win_id].winhighlight = "NormalFloat:MiniPickNormal,FloatBorder:MiniPickBorder"
+      vim.wo[state.win_id].winhighlight =
+        'NormalFloat:MiniPickNormal,FloatBorder:MiniPickBorder'
       vim.wo[state.win_id].wrap = true
     end
 
@@ -1132,9 +1209,7 @@ later(function()
     end
 
     local function close_win()
-      if has_win() then
-        pcall(vim.api.nvim_win_close, state.win_id, true)
-      end
+      if has_win() then pcall(vim.api.nvim_win_close, state.win_id, true) end
       state.win_id = nil
     end
 
@@ -1155,13 +1230,19 @@ later(function()
     end
 
     local function compute_border_size(border)
-      local n = type(border) == "table" and #border or 0
+      local n = type(border) == 'table' and #border or 0
       if n == 0 then
         return 2
-      elseif config.orientation == "vertical" then
-        return ((border[3 % n + 1] == "" and 0 or 1) + (border[7 % n + 1] == "" and 0 or 1))
+      elseif config.orientation == 'vertical' then
+        return (
+          (border[3 % n + 1] == '' and 0 or 1)
+          + (border[7 % n + 1] == '' and 0 or 1)
+        )
       else
-        return ((border[1 % n + 1] == "" and 0 or 1) + (border[5 % n + 1] == "" and 0 or 1))
+        return (
+          (border[1 % n + 1] == '' and 0 or 1)
+          + (border[5 % n + 1] == '' and 0 or 1)
+        )
       end
     end
 
@@ -1169,20 +1250,24 @@ later(function()
       local preview_ratio = config.ratio
       local border_size = compute_border_size(window_config.border)
 
-      if config.orientation == "vertical" then
-        local preview_size = math.floor(preview_ratio * (window_config.width + border_size))
+      if config.orientation == 'vertical' then
+        local preview_size =
+          math.floor(preview_ratio * (window_config.width + border_size))
         local preview_width = math.max(1, preview_size - border_size)
-        local main_width = math.max(1, window_config.width - preview_width - border_size)
+        local main_width =
+          math.max(1, window_config.width - preview_width - border_size)
         window_config.width = main_width
         preview_config.width = preview_width
         preview_config.col = window_config.col + (main_width + border_size)
       else
-        local preview_size = math.floor(preview_ratio * (window_config.height + border_size))
+        local preview_size =
+          math.floor(preview_ratio * (window_config.height + border_size))
         local preview_height = math.max(1, preview_size - border_size)
-        local main_height = math.max(1, window_config.height - preview_height - border_size)
+        local main_height =
+          math.max(1, window_config.height - preview_height - border_size)
         window_config.height = main_height
         preview_config.height = preview_height
-        if window_config.anchor == "SW" then
+        if window_config.anchor == 'SW' then
           window_config.row = window_config.row - (preview_height + border_size)
         else
           preview_config.row = window_config.row + (main_height + border_size)
@@ -1190,23 +1275,43 @@ later(function()
       end
     end
 
-    local function setup(opts) config = vim.tbl_deep_extend("force", config, opts or {}) end
+    local function setup(opts)
+      config = vim.tbl_deep_extend('force', config, opts or {})
+    end
 
     local function scroll(direction)
-      if not has_win() then
-        return
-      end
-      local keys = vim.api.nvim_replace_termcodes(scroll_map[direction], true, true, true)
-      vim.api.nvim_win_call(state.win_id, function() vim.cmd("normal! " .. keys) end)
+      if not has_win() then return end
+      local keys =
+        vim.api.nvim_replace_termcodes(scroll_map[direction], true, true, true)
+      vim.api.nvim_win_call(
+        state.win_id,
+        function() vim.cmd('normal! ' .. keys) end
+      )
     end
 
     local function cache_win_config()
       local picker_state = MiniPick.get_picker_state()
-      if not (picker_state and picker_state.windows and picker_state.windows.main) then
+      if
+        not (
+          picker_state
+          and picker_state.windows
+          and picker_state.windows.main
+        )
+      then
         return
       end
-      local window_config = vim.api.nvim_win_get_config(picker_state.windows.main)
-      local keys = { "anchor", "border", "col", "height", "relative", "row", "width", "zindex" }
+      local window_config =
+        vim.api.nvim_win_get_config(picker_state.windows.main)
+      local keys = {
+        'anchor',
+        'border',
+        'col',
+        'height',
+        'relative',
+        'row',
+        'width',
+        'zindex',
+      }
       for _, key in ipairs(keys) do
         cache.win_config[key] = window_config[key]
       end
@@ -1219,7 +1324,13 @@ later(function()
       end
 
       local picker_state = MiniPick.get_picker_state()
-      if not (picker_state and picker_state.windows and picker_state.windows.main) then
+      if
+        not (
+          picker_state
+          and picker_state.windows
+          and picker_state.windows.main
+        )
+      then
         return
       end
 
@@ -1246,9 +1357,7 @@ later(function()
 
       vim.schedule(vim.cmd.redraw) -- For previewrs that output the result instantly, like file previews with fast treesitter parsers
       -- For previewers that take their sweet time, like `git diff`
-      vim.defer_fn(function()
-        vim.schedule(vim.cmd.redraw)
-      end, 200)
+      vim.defer_fn(function() vim.schedule(vim.cmd.redraw) end, 200)
     end
 
     local function toggle()
@@ -1263,7 +1372,7 @@ later(function()
     end
 
     -- Update preview on picker refresh
-    local mini_pick = require("mini.pick")
+    local mini_pick = require('mini.pick')
     local mini_pick_refresh = mini_pick.refresh
 
     ---@diagnostic disable-next-line: duplicate-set-field
@@ -1285,10 +1394,10 @@ later(function()
     }
   end)()
 
-  local group = vim.api.nvim_create_augroup("UserMiniPick", { clear = true })
+  local group = vim.api.nvim_create_augroup('UserMiniPick', { clear = true })
 
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniPickStart",
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniPickStart',
     group = group,
     callback = function()
       preview.cache_win_config()
@@ -1296,14 +1405,14 @@ later(function()
     end,
   })
 
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniPickMatch",
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniPickMatch',
     group = group,
     callback = function() vim.schedule(preview.update) end,
   })
 
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniPickStop",
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniPickStop',
     group = group,
     callback = preview.stop,
   })
@@ -1311,49 +1420,52 @@ later(function()
   ---@param keys string
   local function feedkeys(keys)
     keys = vim.api.nvim_replace_termcodes(keys, true, true, true)
-    vim.api.nvim_feedkeys(keys, "n", true)
+    vim.api.nvim_feedkeys(keys, 'n', true)
   end
 
   require('mini.pick').setup({
     mappings = {
-      stop = "<C-q>",
+      stop = '<C-q>',
       move_down_arrow = {
-        char = "<Down>",
+        char = '<Down>',
         func = function()
-          feedkeys("<C-n>")
+          feedkeys('<C-n>')
           vim.schedule(preview.update)
         end,
       },
       move_up_arrow = {
-        char = "<Up>",
+        char = '<Up>',
         func = function()
-          feedkeys("<C-p>")
+          feedkeys('<C-p>')
           vim.schedule(preview.update)
         end,
       },
       scroll_down = '<A-j>', --| These don't matter, used in feedkeys
       scroll_up = '<A-k>', ----|
       scroll_down_custom = {
-        char = "<C-S-j>",
+        char = '<C-S-j>',
         func = function()
-          feedkeys("<A-j>")
+          feedkeys('<A-j>')
           vim.schedule(preview.update)
         end,
       },
       scroll_up_custom = {
-        char = "<C-S-k>",
+        char = '<C-S-k>',
         func = function()
-          feedkeys("<A-k>")
+          feedkeys('<A-k>')
           vim.schedule(preview.update)
         end,
       },
       scroll_side_preview_down = {
-        char = "<C-f>",
-        func = function() preview.scroll("down") end,
+        char = '<C-f>',
+        func = function() preview.scroll('down') end,
       },
-      scroll_side_preview_up = { char = "<C-b>", func = function() preview.scroll("up") end },
-      toggle_preview = "",
-      toggle_side_preview = { char = "<Tab>", func = preview.toggle },
+      scroll_side_preview_up = {
+        char = '<C-b>',
+        func = function() preview.scroll('up') end,
+      },
+      toggle_preview = '',
+      toggle_side_preview = { char = '<Tab>', func = preview.toggle },
     },
     window = {
       config = function()
@@ -1365,9 +1477,20 @@ later(function()
   })
 
   MiniPick.registry.grep_todo = function(local_opts, opts)
-    local grep_words = { "FIX", "FIXME", "BUG", "NOTE", "TODO", "FEAT", "WARN", "WARNING", "HACK", "PERF" }
-    local pattern = "(" .. table.concat(grep_words, "|") .. ")[ :]"
-    local_opts = vim.tbl_extend("keep", local_opts or {}, { pattern = pattern })
+    local grep_words = {
+      'FIX',
+      'FIXME',
+      'BUG',
+      'NOTE',
+      'TODO',
+      'FEAT',
+      'WARN',
+      'WARNING',
+      'HACK',
+      'PERF',
+    }
+    local pattern = '(' .. table.concat(grep_words, '|') .. ')[ :]'
+    local_opts = vim.tbl_extend('keep', local_opts or {}, { pattern = pattern })
     return MiniPick.registry.grep(local_opts, opts)
   end
 end)

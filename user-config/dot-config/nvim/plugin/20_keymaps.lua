@@ -33,13 +33,13 @@ nmap('<C-S-j>', '<Cmd>copy +0<CR>')
 nmap('<C-S-k>', '<Cmd>copy -1<CR>')
 
 map('x', '<C-S-j>', ":copy '><CR>gv")
-map('x', '<C-S-k>', ":copy -1<CR>gv")
+map('x', '<C-S-k>', ':copy -1<CR>gv')
 
 -- Alias to open link
 nmap('g;', function()
-  local url = vim.fn.expand '<cfile>'
+  local url = vim.fn.expand('<cfile>')
   if url ~= '' then vim.fn.jobstart({ 'xdg-open', url }, { detach = true }) end
-end, 'Open stuff under cursor' )
+end, 'Open stuff under cursor')
 
 -- Better text editing
 map({ 'c', 'i' }, '<C-d>', '<C-Del>', { desc = 'Delete word forward' })
@@ -61,50 +61,47 @@ local function move_or_exec(dir, cmd)
   end
 end
 
+-- stylua: ignore start
 nmap('<C-w>h', move_or_exec( "h", "i3-msg focus left"), 'Move focus to the left window' )
 nmap('<C-w>l', move_or_exec( "l", "i3-msg focus right"), 'Move focus to the right window' )
 nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"), 'Move focus to the lower window' )
 nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"), 'Move focus to the upper window' )
+-- stylua: ignore end
 
-nmap('<C-`>', ':ToggleTerm<CR>',  'Toggle Terminal')
-map('t', '<C-`>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
+nmap('<C-`>', ':ToggleTerm<CR>', 'Toggle Terminal')
+map('t', '<C-`>', '<Cmd>ToggleTerm<CR>', { desc = 'Toggle Terminal' })
 
-nmap("dm", "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", "Del mark" )
+nmap('dm', "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", 'Del mark')
 
-nmap("gb", function()
+nmap('gb', function()
   local buf = vim.v.count
 
   if buf == 0 then
-    vim.notify("Provide a buffer number", vim.log.levels.WARN)
+    vim.notify('Provide a buffer number', vim.log.levels.WARN)
     return
   end
 
   if vim.api.nvim_buf_is_valid(buf) then
-    vim.cmd("buffer " .. buf)
+    vim.cmd('buffer ' .. buf)
   else
-    vim.notify("Buffer " .. buf .. " does not exist", vim.log.levels.ERROR)
+    vim.notify('Buffer ' .. buf .. ' does not exist', vim.log.levels.ERROR)
   end
-end, "Go to buffer by number")
+end, 'Go to buffer by number')
 
 local function copy_path(mode)
   local path = vim.fn.expand(mode)
 
-  if path == "" then
-    vim.notify("No file path available", vim.log.levels.ERROR)
+  if path == '' then
+    vim.notify('No file path available', vim.log.levels.ERROR)
     return
   end
 
-  vim.fn.setreg("+", path)
-  vim.notify("Copied: " .. path)
+  vim.fn.setreg('+', path)
+  vim.notify('Copied: ' .. path)
 end
 
-vim.keymap.set("n", "yfa", function()
-  copy_path("%:p")
-end, { desc = "Yank absolute file path" })
-
-vim.keymap.set("n", "yfr", function()
-  copy_path("%")
-end, { desc = "Yank relative file path" })
+nmap('yfa', function() copy_path('%:p') end, 'Yank absolute file path')
+nmap('yfr', function() copy_path('%') end, 'Yank relative file path')
 
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
