@@ -764,7 +764,74 @@ later(function() require('mini.diff').setup({
 -- - `:h MiniGit-examples` - examples of common setups
 -- - `:h :Git` - more details about `:Git` user command
 -- - `:h MiniGit.show_at_cursor()` - what information at cursor is shown
-later(function() require('mini.git').setup() end)
+later(function()
+  require('mini.git').setup()
+
+  vim.cmd.cnoreabbrev("G", "Git")
+  vim.cmd.cnoreabbrev("Gc", "Git checkout")
+  vim.cmd.cnoreabbrev("Gca", "Git commit --amend")
+
+  -- Git blame
+
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "MiniGitCommandSplit",
+    group = vim.api.nvim_create_augroup("mini_gitblame", { clear = true }),
+    desc = "Enhance `Git blame`: colorize buffer and set width for vertical split",
+    callback = function(e)
+      if e.data.git_subcommand ~= "blame" then
+        return
+      end
+      local win_src = e.data.win_source
+      local buf = e.buf
+      local win = e.data.win_stdout
+      vim.bo[buf].modifiable = false
+      vim.wo[win].wrap = false
+      vim.wo[win].cursorline = true
+      vim.fn.winrestview({ topline = vim.fn.line("w0", win_src) })
+      vim.api.nvim_win_set_cursor(0, { vim.fn.line(".", win_src), 0 })
+      vim.wo[win].scrollbind, vim.wo[win_src].scrollbind = true, true
+      vim.wo[win].cursorbind, vim.wo[win_src].cursorbind = true, true
+      if string.match(e.data.cmd_input.mods, "vertical") then
+        local lines = vim.api.nvim_buf_get_lines(0, 1, -1, false)
+        local width = vim.iter(lines):fold(-1, function(acc, ln)
+          local stat = string.match(ln, "^[%w%p]+ %b()")
+          return math.max(acc, vim.fn.strwidth(stat))
+        end)
+        width = width + vim.fn.getwininfo(win)[1].textoff
+        vim.api.nvim_win_set_width(win, width)
+      end
+      local leftmost = [[^.\{-}\zs]]
+      -- stylua: ignore start
+      --[[ ^hash  ]] vim.fn.matchadd("Tag", [[^^\w\+]])
+      --[[ hash   ]] vim.fn.matchadd("Identifier", [[^\w\+]])
+      --[[ author ]] vim.fn.matchadd("String", leftmost .. [[(\zs.\{-} \ze\d\{4}-]])
+      --[[ date   ]] vim.fn.matchadd("Comment", leftmost .. [[[0-9-]\{10} [0-9:]\{8} [+-]\d\+]])
+    end,
+  })
+
+  vim.api.nvim_create_user_command("GitBlame", function()
+    local git_wins = vim
+      .iter(vim.api.nvim_tabpage_list_wins(0))
+      :filter(function(win)
+        local buf = vim.api.nvim_win_get_buf(win)
+        return vim.bo[buf].ft == "git_blame"
+      end)
+      :totable()
+    if not vim.tbl_isempty(git_wins) then
+      vim.iter(git_wins):each(function(win)
+        vim.api.nvim_win_close(win, true)
+      end)
+    else
+      local open = function()
+        vim.cmd([[vert above Git blame -- %]])
+        vim.bo.ft = "git_blame"
+      end
+      if not pcall(open) then
+        vim.notify("[mini.git] Unable to open `:GitBlame` for the file", vim.log.levels.WARN)
+      end
+    end
+  end, {})
+end)
 
 -- Highlight patterns in text. Like `TODO`/`NOTE` or color hex codes.
 -- Example usage:
