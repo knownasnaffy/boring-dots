@@ -317,3 +317,15 @@ on_filetype('lua', function()
 
   require('lazydev').setup(opts)
 end)
+
+on_filetype('markdown', function()
+  local build = function()
+    vim.cmd.packadd('markdown-preview.nvim')
+    vim.fn['mkdp#util#install']()
+  end
+  Config.on_packchanged('markdown-preview.nvim', { 'install', 'update' }, build, 'Build markdown-preview')
+  add({ 'https://github.com/iamcco/markdown-preview.nvim' })
+
+  -- Do not close the preview tab when switching to other buffers
+  vim.g.mkdp_auto_close = 0
+end)
