@@ -3,6 +3,9 @@
 -- THIS CONFIG IS VERIFIED FOR AT LEAST VERSION `v0.13.0-dev-29+g1bcf2d7f90`.
 -- WHEN IN DOUBT - UPDATE TO THE LATEST DEVELOPMENT VERSION.
 
+-- Notable mentions that helped me personalize the config:
+-- + https://github.com/drowning-cat/nvim
+
 -- ┌────────────────────┐
 -- │ Welcome to MiniMax │
 -- └────────────────────┘
