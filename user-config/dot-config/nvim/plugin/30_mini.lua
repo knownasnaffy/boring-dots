@@ -842,17 +842,55 @@ end)
 later(function()
   local hipatterns = require('mini.hipatterns')
   local hi_words = MiniExtra.gen_highlighter.words
+
+  local perf_bg = vim.api.nvim_get_hl(0, { name = "@keyword", link = false }).fg
+  vim.api.nvim_set_hl(0, "HipatternsPerf", { bold = true, fg = "black", bg = perf_bg })
+
   hipatterns.setup({
     highlighters = {
       -- Highlight a fixed set of common words. Will be highlighted in any place,
       -- not like "only in comments".
-      fixme = hi_words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
-      hack = hi_words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
-      todo = hi_words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
-      note = hi_words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
-
-      -- Highlight hex color string (#aabbcc) with that color as a background
+      fix = hi_words({ "FIX", "FIXME", "BUG" }, "MiniHipatternsFixme"),
+      note = hi_words({ "NOTE" }, "MiniHipatternsNote"),
+      todo = hi_words({ "TODO", "FEAT" }, "MiniHipatternsTodo"),
+      hack = hi_words({ "WARN", "WARNING", "HACK" }, "MiniHipatternsHack"),
+      perf = hi_words({ "PERF" }, "HipatternsPerf"),
+      -- Highlight hex color string (#aabbcc)
       hex_color = hipatterns.gen_highlighter.hex_color(),
+      -- Highlight short hex color string (#000)
+      hex_color_short = {
+        pattern = "()#%x%x%x()%f[^%x%w]",
+        group = function(_, _, data)
+          local match = data.full_match
+          local r, g, b = match:sub(2, 2), match:sub(3, 3), match:sub(4, 4)
+          local hex_color = "#" .. r .. r .. g .. g .. b .. b
+          return MiniHipatterns.compute_hex_color_group(hex_color, "bg")
+        end,
+      },
+      -- * { color: hsl(80, 80%, 50%) }
+      hsl_color = {
+        -- NOTE: Partial support for CSS hsl()
+        pattern = "hsl%(%d+[, ] ?%d+%%?[, ] ?%d+%%?%)",
+        group = function(_, m, _)
+          -- https://www.w3.org/TR/css-color-3/#hsl-color
+          local function hsl_to_rgb(h, s, l)
+            h, s, l = h % 360, s / 100, l / 100
+            if h < 0 then
+              h = h + 360
+            end
+            local function f(n)
+              local k = (n + h / 30) % 12
+              local a = s * math.min(l, 1 - l)
+              return l - a * math.max(-1, math.min(k - 3, 9 - k, 1))
+            end
+            return f(0) * 255, f(8) * 255, f(4) * 255
+          end
+          local h, s, l = m:match("(%d+)[, ] ?(%d+)%%?[, ] ?(%d+)%%?")
+          local r, g, b = hsl_to_rgb(h, s, l)
+          local hex = string.format("#%02x%02x%02x", r, g, b)
+          return MiniHipatterns.compute_hex_color_group(hex, 'bg')
+        end,
+      },
     },
   })
 end)
