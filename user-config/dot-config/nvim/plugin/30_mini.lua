@@ -929,6 +929,9 @@ later(function()
       dim = true,
       n_steps_ahead = 3
     },
+    mappings = {
+      start_jumping = "sj",
+    }
   })
 end)
 
