@@ -75,16 +75,36 @@ nmap("gb", function()
   local buf = vim.v.count
 
   if buf == 0 then
-    print("Provide a buffer number")
+    vim.notify("Provide a buffer number", vim.log.levels.WARN)
     return
   end
 
   if vim.api.nvim_buf_is_valid(buf) then
     vim.cmd("buffer " .. buf)
   else
-    print("Buffer " .. buf .. " does not exist")
+    vim.notify("Buffer " .. buf .. " does not exist", vim.log.levels.ERROR)
   end
 end, "Go to buffer by number")
+
+local function copy_path(mode)
+  local path = vim.fn.expand(mode)
+
+  if path == "" then
+    vim.notify("No file path available", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end
+
+vim.keymap.set("n", "yfa", function()
+  copy_path("%:p")
+end, { desc = "Yank absolute file path" })
+
+vim.keymap.set("n", "yfr", function()
+  copy_path("%")
+end, { desc = "Yank relative file path" })
 
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
