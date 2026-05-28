@@ -1363,6 +1363,13 @@ later(function()
       end,
     },
   })
+
+  MiniPick.registry.grep_todo = function(local_opts, opts)
+    local grep_words = { "FIX", "FIXME", "BUG", "NOTE", "TODO", "FEAT", "WARN", "WARNING", "HACK", "PERF" }
+    local pattern = "(" .. table.concat(grep_words, "|") .. ")[ :]"
+    local_opts = vim.tbl_extend("keep", local_opts or {}, { pattern = pattern })
+    return MiniPick.registry.grep(local_opts, opts)
+  end
 end)
 
 -- Manage and expand snippets (templates for a frequently used text).
