@@ -128,3 +128,28 @@ local diagnostic_opts = {
 -- Use `later()` to avoid sourcing `vim.diagnostic` on startup
 Config.later(function() vim.diagnostic.config(diagnostic_opts) end)
 -- stylua: ignore end
+
+vim.g.cycle_config = {
+  { words = { 'true', 'false' } },
+  { words = { 'True', 'False' }, pat = '%f[%u]()%f[%W]' },
+  { words = { 'left', 'right' } },
+  { words = { 'Left', 'Right' }, pat = '%f[%u]()%f[%W]' },
+  { words = { 'up', 'down' } },
+  { words = { 'Up', 'Down' }, pat = '%f[%u]()%f[%W]' },
+  { words = { 'top', 'bottom' } },
+  { words = { 'and', 'or' } },
+  { words = { 'get', 'set' } },
+  { words = { '&&', '||' }, pat = '()' },
+  { words = { 'yes', 'no', 'maybe' } },
+  { words = { 'on', 'off' } },
+  {
+    words = { 'stylua: ignore start', 'stylua: ignore end', 'stylua: ignore' },
+    pat = '()',
+  },
+  { words = { 'start', 'end' } },
+  { words = { 'now', 'later' } },
+  { words = { 'keep', 'force' } },
+  { words = { 'horizontal', 'vertical' } },
+  { words = { 'NOTE', 'WARN', 'ERROR' } },
+  { words = { 'GET', 'POST', 'PUT', 'DELETE' } },
+}
