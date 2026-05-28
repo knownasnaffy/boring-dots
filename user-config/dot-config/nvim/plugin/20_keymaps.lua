@@ -71,6 +71,21 @@ map('t', '<C-`>', '<Cmd>ToggleTerm<CR>',  { desc = 'Toggle Terminal' })
 
 nmap("dm", "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", "Del mark" )
 
+nmap("gb", function()
+  local buf = vim.v.count
+
+  if buf == 0 then
+    print("Provide a buffer number")
+    return
+  end
+
+  if vim.api.nvim_buf_is_valid(buf) then
+    vim.cmd("buffer " .. buf)
+  else
+    print("Buffer " .. buf .. " does not exist")
+  end
+end, "Go to buffer by number")
+
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
 -- stylua: ignore start
