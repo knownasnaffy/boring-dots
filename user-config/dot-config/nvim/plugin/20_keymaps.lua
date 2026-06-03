@@ -385,6 +385,7 @@ nmap_leader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default wi
 nmap_leader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>',    'Trim trailspace')
 nmap_leader('oz', '<Cmd>lua MiniMisc.zoom()<CR>',          'Zoom toggle')
 nmap_leader('om', '<Cmd>Mason<CR>',                        'Open Mason')
+nmap_leader('ou', '<Cmd>Undotree<CR>',                     'Open Undotree')
 
 -- s is for 'Session'. Common usage:
 -- - `<Leader>sn` - start new session

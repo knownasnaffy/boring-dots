@@ -13,6 +13,11 @@ local add = vim.pack.add
 local now, now_if_args, later, on_filetype =
   Config.now, Config.now_if_args, Config.later, Config.on_filetype
 
+-- Undo Tree ==================================================================
+
+-- Visualization of the undo history in branch form
+vim.cmd.packadd('nvim.undotree')
+
 -- Tree-sitter ================================================================
 
 -- Tree-sitter is a tool for fast incremental parsing. It converts text into
