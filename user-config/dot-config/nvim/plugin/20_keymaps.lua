@@ -74,19 +74,25 @@ map('t', '<C-`>', '<Cmd>ToggleTerm<CR>', { desc = 'Toggle Terminal' })
 nmap('dm', "<Cmd>exe 'delmarks ' . getcharstr()<Enter>", 'Del mark')
 
 nmap('gb', function()
-  local buf = vim.v.count
+  local index = vim.v.count
 
-  if buf == 0 then
+  if index == 0 then
     vim.notify('Provide a buffer number', vim.log.levels.WARN)
     return
   end
 
-  if vim.api.nvim_buf_is_valid(buf) then
-    vim.cmd('buffer ' .. buf)
+  local bufs = vim.tbl_filter(function(buf)
+    return vim.bo[buf].buflisted
+  end, vim.api.nvim_list_bufs())
+
+  local buf = bufs[index]
+
+  if buf then
+    vim.api.nvim_set_current_buf(buf)
   else
-    vim.notify('Buffer ' .. buf .. ' does not exist', vim.log.levels.ERROR)
+    vim.notify('Buffer ' .. index .. ' does not exist', vim.log.levels.ERROR)
   end
-end, 'Go to buffer by number')
+end, 'Go to buffer by index')
 
 local function copy_path(mode)
   local path = vim.fn.expand(mode)

@@ -121,11 +121,27 @@ now(function() require('mini.statusline').setup() end)
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
 now(function()
-  require('mini.tabline').setup({
-    format = function(buf_id, label)
-      return string.format(' [%d] %s ', buf_id, label)
-    end,
-  })
+local function listed_buffers()
+  return vim.tbl_filter(function(buf)
+    return vim.bo[buf].buflisted
+  end, vim.api.nvim_list_bufs())
+end
+
+require('mini.tabline').setup({
+  format = function(buf_id, label)
+    local bufs = listed_buffers()
+
+    local index
+    for i, buf in ipairs(bufs) do
+      if buf == buf_id then
+        index = i
+        break
+      end
+    end
+
+    return string.format(' [%d] %s ', index, label)
+  end,
+})
 end)
 
 -- Step one or two ============================================================
