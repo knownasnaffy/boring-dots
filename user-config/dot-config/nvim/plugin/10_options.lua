@@ -152,4 +152,5 @@ vim.g.cycle_config = {
   { words = { 'horizontal', 'vertical' } },
   { words = { 'NOTE', 'WARN', 'ERROR' } },
   { words = { 'GET', 'POST', 'PUT', 'DELETE' } },
+  { words = { '%- %[ %]', '%- %[x%]', }, pat = '()', }, -- Markdown checkboxes
 }

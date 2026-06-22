@@ -704,6 +704,14 @@ later(function()
     end
   end
 
+  local function escape_lua_pattern(s)
+    return (s:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1"))
+  end
+
+  local function unescape_lua_pattern(s)
+    return (s:gsub("%%(.)", "%1"))
+  end
+
   local function get_config()
     local config = {}
     vim.list_extend(config, vim.b.cycle_config or {})
@@ -716,11 +724,8 @@ later(function()
       )
       conf._patterns = vim.tbl_map(function(word)
         local pat = conf.pat
-        local word_pat, gc = pat:gsub('%(%)', word)
-        return gc == 1 and word_pat
-          or error(
-            ('[mini.cycle] Unable to substitute pattern: %s'):format(pat)
-          )
+        local word_pat = pat:gsub('%(%)', escape_lua_pattern(word))
+        return word_pat
       end, conf.words)
       config[i] = conf
     end
@@ -770,13 +775,14 @@ later(function()
     end
     local match_text = buf_get_text(match_reg)[1]
     for _, conf in ipairs(config) do
-      if vim.list_contains(conf.words, match_text) then
+      if vim.list_contains(conf.words, escape_lua_pattern(match_text)) then
         local cover_reg, i = find_longest_cover(conf, match_reg.from)
         if cover_reg then
           local next_index = conf.cycle and (i % #conf.words + 1)
             or math.min(i + 1, #conf.words)
-          local next_word = conf.words[next_index]
+          local next_word = unescape_lua_pattern(conf.words[next_index])
           local cover_text = buf_get_text(cover_reg)[1]
+
           if next_word ~= cover_text then
             buf_set_text(cover_reg, { next_word }, true)
           end
