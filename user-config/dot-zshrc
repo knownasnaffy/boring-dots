@@ -235,6 +235,13 @@ rocket() {
   podman rmi "$img"
 }
 
+makecpp() {
+    local exe="${1%.cpp}"
+
+    g++ -std=c++20 -Wall -Wextra -O2 "$1" -o "$exe" &&
+    "./$exe" "${@:2}"
+}
+
 
 
 # Don't save commands starting with a space in history
