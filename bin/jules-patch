@@ -2,11 +2,18 @@
 
 set -euo pipefail
 
-url="$1"
-prefix="$2"
+apply_mode=false
 
-if [[ -z "$url" || -z "$prefix" ]]; then
-    echo "Usage: $0 <session-url> <prefix>"
+if [[ "${1:-}" == "--apply" ]]; then
+    apply_mode=true
+    shift
+fi
+
+url="${1:-}"
+prefix="${2:-}"
+
+if [[ -z "$url" ]]; then
+    echo "Usage: $0 [--apply] <session-url> [prefix]"
     exit 1
 fi
 
@@ -18,15 +25,26 @@ if [[ -z "$session_id" ]]; then
     exit 1
 fi
 
-# Find first available patch filename
-i=1
-while [[ -e "${prefix}-${i}.patch" ]]; do
-    ((i++))
-done
-
-patch_file="${prefix}-${i}.patch"
-
 echo "Session ID : $session_id"
-echo "Patch file : $patch_file"
 
-jules remote pull --session "$session_id" > "$patch_file"
+if $apply_mode; then
+    echo "Applying patch directly..."
+    jules remote pull --session "$session_id" --apply
+else
+    if [[ -z "$prefix" ]]; then
+        echo "Prefix is required unless using --apply"
+        exit 1
+    fi
+
+    # Find first available patch filename
+    i=1
+    while [[ -e "${prefix}-${i}.patch" ]]; do
+        ((i++))
+    done
+
+    patch_file="${prefix}-${i}.patch"
+
+    echo "Patch file : $patch_file"
+
+    jules remote pull --session "$session_id" > "$patch_file"
+fi
