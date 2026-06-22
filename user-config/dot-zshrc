@@ -11,7 +11,7 @@ zstyle ':omz:update' frequency 14
 # DISABLE_MAGIC_FUNCTIONS="true"
 
 # command auto-correction.
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 COMPLETION_WAITING_DOTS="true"
@@ -238,7 +238,7 @@ rocket() {
 makecpp() {
     local exe="${1%.cpp}"
 
-    g++ -std=c++20 -Wall -Wextra -O2 "$1" -o "$exe" &&
+    g++ -std=c++20 -pedantic-errors -Wall -Wextra -O2 "$1" -o "$exe" &&
     "./$exe" "${@:2}"
 }
 
