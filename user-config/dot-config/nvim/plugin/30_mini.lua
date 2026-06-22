@@ -1119,40 +1119,40 @@ later(function() require('mini.indentscope').setup() end)
 -- highlight all target matches. Example usage:
 -- - `fxff` - move *f*orward onto next character "x", then next, and next again
 -- - `dt)` - *d*elete *t*ill next closing parenthesis (`)`)
-later(function()
-  require('mini.jump').setup({
-    mappings = {
-      forward = 'f',
-      backward = 'F',
-      forward_till = 't',
-      backward_till = 'T',
-    },
-  })
-
-  local custom_jump = function(backward, till)
-    return function()
-      local target = vim.fn.getcharstr()
-      MiniJump.jump(target, backward, till)
-    end
-  end
-  vim.keymap.set('n', 'f', custom_jump(false, false))
-  vim.keymap.set('n', 'F', custom_jump(true, false))
-  vim.keymap.set('n', 't', custom_jump(false, true))
-  vim.keymap.set('n', 'T', custom_jump(true, true))
-
-  -- Why? Because I had a use case:
-  -- { mode = 'n', keys = '<Leader>b',  desc = '+Buffer' },
-  --            this 'd' was my target  ↑  in a macro
-  --            to reach it, I decided on using $F'F'Fd
-  --            which would've worked great without mini.jump but since I'm
-  --            using mini.jump, F would go to the previous '
-  --            To tackle this, I thought that since we have ; as a repeat jump
-  --            keybind, there was no real need to have smart jump on fFtT
-  --            And here we are, with my personalized flow that works for me.
-  --            For the people who think they would've instead used $F'FhFd,
-  --            instead of tinkering with the plugin setup, you might be more
-  --            intelligent than me.
-end)
+-- later(function()
+--   require('mini.jump').setup({
+--     mappings = {
+--       forward = 'f',
+--       backward = 'F',
+--       forward_till = 't',
+--       backward_till = 'T',
+--     },
+--   })
+--
+--   local custom_jump = function(backward, till)
+--     return function()
+--       local target = vim.fn.getcharstr()
+--       MiniJump.jump(target, backward, till)
+--     end
+--   end
+--   vim.keymap.set('n', 'f', custom_jump(false, false))
+--   vim.keymap.set('n', 'F', custom_jump(true, false))
+--   vim.keymap.set('n', 't', custom_jump(false, true))
+--   vim.keymap.set('n', 'T', custom_jump(true, true))
+--
+--   -- Why? Because I had a use case:
+--   -- { mode = 'n', keys = '<Leader>b',  desc = '+Buffer' },
+--   --            this 'd' was my target  ↑  in a macro
+--   --            to reach it, I decided on using $F'F'Fd
+--   --            which would've worked great without mini.jump but since I'm
+--   --            using mini.jump, F would go to the previous '
+--   --            To tackle this, I thought that since we have ; as a repeat jump
+--   --            keybind, there was no real need to have smart jump on fFtT
+--   --            And here we are, with my personalized flow that works for me.
+--   --            For the people who think they would've instead used $F'FhFd,
+--   --            instead of tinkering with the plugin setup, you might be more
+--   --            intelligent than me.
+-- end)
 
 -- Jump within visible lines to pre-defined spots via iterative label filtering.
 -- Spots are computed by a configurable spotter function. Example usage:
