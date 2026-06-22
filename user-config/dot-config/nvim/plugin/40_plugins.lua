@@ -272,6 +272,7 @@ now(function()
   add({ 'https://github.com/folke/snacks.nvim' })
   local snacks = require('snacks')
   snacks.setup({
+    bigfile = {},
     gitbrowse = {
       what = 'branch',
     },
