@@ -335,3 +335,17 @@ on_filetype('markdown', function()
   -- Do not close the preview tab when switching to other buffers
   vim.g.mkdp_auto_close = 0
 end)
+
+now_if_args(function()
+  local run_file_cmds = {
+    cpp = 'makecpp',
+    python = '.venv/bin/python',
+  }
+
+  vim.keymap.set('n', '<leader>oc', function()
+    local cmd = run_file_cmds[vim.bo.filetype]
+    if not cmd then return end
+
+    vim.cmd('TermExec cmd="' .. cmd .. ' %" go_back=0')
+  end, { desc = 'Open/Run current file' })
+end)
