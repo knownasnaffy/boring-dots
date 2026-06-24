@@ -45,9 +45,6 @@ bindsym $mod+grave exec xfce4-terminal --drop-down
 # kill focused window
 bindsym $mod+q kill
 
-# start dmenu (a program launcher)
-bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-
 # change focus
 bindsym $mod+h focus left
 bindsym $mod+j focus down
@@ -146,6 +143,19 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-gpaste
+
+mode "app" {
+        bindsym b exec --no-startup-id ~/.local/opt/Beeper/Beeper.AppImage; mode "default"
+        bindsym a exec --no-startup-id ~/.local/opt/android-studio/bin/studio; mode "default"
+        bindsym s exec --no-startup-id spotube; mode "default"
+        bindsym v exec --no-startup-id vivaldi-stable; mode "default"
+        bindsym d exec --no-startup-id rofi -show drun; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+d mode "app"
 
 mode "open" {
         bindsym p exec --no-startup-id ~/.local/bin/rofi-pass; mode "default"
