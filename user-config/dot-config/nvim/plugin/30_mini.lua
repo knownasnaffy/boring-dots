@@ -1719,6 +1719,24 @@ later(function()
     },
   })
 
+  -- Stop when final tabstop is reached
+  local fin_stop = function(args)
+    if args.data.tabstop_to == '0' then MiniSnippets.session.stop() end
+  end
+  Config.new_autocmd('User', 'MiniSnippetsSessionJump', fin_stop)
+
+  -- Stop when returning to normal mode
+  local make_stop = function()
+    local au_opts = { pattern = '*:n', once = true }
+    au_opts.callback = function()
+      while MiniSnippets.session.get() do
+        MiniSnippets.session.stop()
+      end
+    end
+    vim.api.nvim_create_autocmd('ModeChanged', au_opts)
+  end
+  Config.new_autocmd('User', 'MiniSnippetsSessionStart', make_stop)
+
   -- By default snippets available at cursor are not shown as candidates in
   -- 'mini.completion' menu. This requires a dedicated in-process LSP server
   -- that will provide them. To have that, uncomment next line (use `gcc`).
