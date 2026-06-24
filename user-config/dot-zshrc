@@ -236,10 +236,13 @@ rocket() {
 }
 
 makecpp() {
-    local exe="${1%.cpp}"
+    local exe
+    exe="$(realpath -- "${1%.cpp}")"
 
-    g++ -std=c++23 -pedantic-errors -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -O2 "$1" -o "$exe" &&
-    "./$exe" "${@:2}"
+    g++ -std=c++23 -pedantic-errors -Wall -Weffc++ -Wextra \
+        -Wconversion -Wsign-conversion -O2 \
+        "$1" -o "$exe" &&
+    "$exe" "${@:2}"
 }
 
 
