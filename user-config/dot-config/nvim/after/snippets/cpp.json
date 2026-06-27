@@ -1,0 +1,16 @@
+{
+  "Starter Template": {
+    "prefix": "st",
+    "body": [
+      "#include <iostream>",
+      "using namespace std;",
+      "",
+      "int main () {",
+      "\t$1",
+      "",
+      "\treturn 0;",
+      "}"
+    ],
+    "description": "Standard starter template for a tiny C++ program"
+  }
+}
