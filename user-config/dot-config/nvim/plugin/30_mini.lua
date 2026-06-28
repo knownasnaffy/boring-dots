@@ -81,7 +81,28 @@ now(function() require('mini.notify').setup() end)
 -- - `<Leader>sn` - start new session
 -- - `<Leader>sr` - read previously started session
 -- - `<Leader>sd` - delete previously started session
-now(function() require('mini.sessions').setup() end)
+now(function()
+  local MiniSessions = require('mini.sessions')
+  MiniSessions.setup()
+
+  local timer = vim.uv.new_timer()
+
+  if timer then
+    timer:start(
+      5 * 60 * 1000, -- wait 5 minutes
+      5 * 60 * 1000, -- repeat every 5 minutes
+      vim.schedule_wrap(function()
+        -- Only save if a session is currently active
+        if vim.v.this_session ~= "" then
+          MiniSessions.write(nil, {
+            force = true,
+            verbose = false,
+          })
+        end
+      end)
+    )
+  end
+end)
 
 -- Start screen. This is what is shown when you open Neovim like `nvim`.
 -- Example usage:
