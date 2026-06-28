@@ -137,6 +137,7 @@ assign [class="Spotube"] 4
 assign [class="jetbrains-studio"] 9
 
 for_window [title="NetManTUI"] floating enable
+for_window [title="CalTUI"] floating enable
 
 
 # reload the configuration file
@@ -164,6 +165,7 @@ mode "open" {
         bindsym t exec --no-startup-id rofi -show timer -modi timer:$HOME/.local/bin/rofi-timer; mode "default"
         bindsym c exec --no-startup-id rofi -show calc -modi calc -no-show-match -no-sort > /dev/null; mode "default"
         bindsym w exec --no-startup-id kitty -T NetManTUI nmtui; mode "default"
+        bindsym Shift+c exec --no-startup-id kitty -T CalTUI zsh -i -c "cal -3 && echo -e '\ncal [-y] [-1] [-3] [-m]' && exec zsh -i"; mode "default"
 
         bindsym q mode "default"
         bindsym Escape mode "default"
