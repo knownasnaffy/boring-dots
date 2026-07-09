@@ -137,6 +137,8 @@ assign [class="Spotube"] 4
 assign [class="jetbrains-studio"] 9
 
 for_window [title="NetManTUI"] floating enable
+for_window [title="NetManTUI"] resize set 840 680
+for_window [title="NetManTUI"] move position center
 for_window [title="CalTUI"] floating enable
 
 
