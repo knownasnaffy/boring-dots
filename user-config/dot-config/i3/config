@@ -151,7 +151,7 @@ bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-gpaste
 
 mode "app" {
         bindsym b exec --no-startup-id ~/.local/opt/Beeper/Beeper.AppImage; mode "default"
-        bindsym a exec --no-startup-id ~/.local/opt/android-studio/bin/studio; mode "default"
+        bindsym a exec --no-startup-id ~/.local/opt/antigravity/antigravity; mode "default"
         bindsym s exec --no-startup-id spotube; mode "default"
         bindsym v exec --no-startup-id vivaldi-stable; mode "default"
         bindsym d exec --no-startup-id rofi -show drun; mode "default"
