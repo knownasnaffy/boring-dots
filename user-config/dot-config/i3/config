@@ -24,7 +24,7 @@ exec --no-startup-id sh -c ". ~/.fehbg"
 exec --no-startup-id gpaste-client start
 
 exec --no-startup-id qutebrowser
-exec --no-startup-id $terminal
+exec --no-startup-id $terminal --detach zsh -c "figlet -f lean -w 300 WELCOME BACK && exec zsh -i"
 
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
