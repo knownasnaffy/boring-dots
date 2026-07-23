@@ -23,8 +23,8 @@ c.scrolling.smooth = True
 c.tabs.mode_on_change = "restore"
 c.tabs.last_close = "startpage"
 
-c.url.default_page = "https://start.barinr.xyz"
-c.url.start_pages = "https://start.barinr.xyz"
+c.url.default_page = "https://start.barinderpreet.com"
+c.url.start_pages = "https://start.barinderpreet.com"
 c.url.searchengines["DEFAULT"] = "https://duckduckgo.com/?q={}"
 c.url.searchengines["p"] = "https://www.perplexity.ai/?q={}"
 c.url.searchengines["y"] = "https://www.youtube.com/results?search_query={}"
