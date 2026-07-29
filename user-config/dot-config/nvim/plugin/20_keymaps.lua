@@ -411,6 +411,7 @@ local toggle_inlay_hints = function()
 end
 
 nmap_leader('ti', toggle_inlay_hints, 'Inlay Hints')
+nmap_leader('tc', '<Cmd>CsvViewToggle<CR>', 'CSV View')
 
 -- v is for 'Visits'. Common usage:
 -- - `<Leader>vv` - add    "core" label to current file.
