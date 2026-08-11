@@ -141,7 +141,9 @@ vim.g.cycle_config = {
   { words = { 'get', 'set' } },
   { words = { '&&', '||' }, pat = '()' },
   { words = { 'yes', 'no', 'maybe' } },
+  { words = { 'Yes', 'No', 'Maybe' }, pat = '%f[%u]()%f[%W]' },
   { words = { 'on', 'off' } },
+  { words = { 'On', 'Off' }, pat = '%f[%u]()%f[%W]' },
   {
     words = { 'stylua: ignore start', 'stylua: ignore end', 'stylua: ignore' },
     pat = '()',
@@ -153,4 +155,5 @@ vim.g.cycle_config = {
   { words = { 'NOTE', 'WARN', 'ERROR' } },
   { words = { 'GET', 'POST', 'PUT', 'DELETE' } },
   { words = { '%- %[ %]', '%- %[x%]', }, pat = '()', }, -- Markdown checkboxes
+  { words = { 'pending', 'wip', 'complete' } },
 }
