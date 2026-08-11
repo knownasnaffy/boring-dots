@@ -65,13 +65,13 @@ PROMPT=$'
     done
 
     local container_suffix=""
-    [[ $container == "oci" ]] && container_suffix=" %F{white}in %F{yellow}OCI%f"
+    [[ $container == "oci" || -n $CONTAINER_ID ]] && container_suffix=" %F{white}in %F{yellow}OCI%f"
 
     if $trusted; then
         local branch=$(git_current_branch)
 
         if [[ -n $branch ]]; then
-            echo "%c %F{white}on %F{magenta}$branch %F{red}$(git_prompt_status)%f %f${container_suffix}"
+            echo "%c%f${container_suffix} %F{white}on %F{magenta}$branch %F{red}$(git_prompt_status)%f"
         else
             echo "%~${container_suffix}"
         fi
