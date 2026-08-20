@@ -1,9 +1,11 @@
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/54fe0481-8712-4d23-8d39-9cebbca67192" />
+
 # Boring Dots
 
 This repo contains boring dotfiles for the various software I use. The configs
-were made to be functional and not eye candy.
+were made to be functional and ~not eye candy~ somewhat good looking (I couldn't resist).
 
-If you wish to see something nice, head over to my [mildly interesting dotfiles
+If you wish to see something nicer, head over to my [mildly interesting dotfiles
 repo](https://github.com/knownasnaffy/dotfiles)
 
 ## Why?
