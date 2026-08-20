@@ -11,7 +11,7 @@ DEFAULT_OUTPUT="${HOME}/Pictures/Screenshots/Screenshot-$(date +%Y%m%d-%H%M%S).p
 
 for arg in "$@"; do
   # --- TYPE CHECK ---
-  if [[ "$arg" == "--screen" || "$arg" == "--window" ]]; then
+  if [[ "$arg" == "--screen" || "$arg" == "--window" || "$arg" == "--area" ]]; then
     if [[ -n "$TYPE" ]]; then
       echo "Error: Multiple types specified (already have '$TYPE', got '$arg')"
       exit 1
@@ -44,7 +44,7 @@ done
 
 # --- VALIDATION ---
 if [[ -z "$TYPE" ]]; then
-  echo "Error: You must specify '--screen' or '--window'"
+  echo "Error: You must specify '--screen', '--window' or '--area'"
   exit 1
 fi
 
@@ -62,15 +62,13 @@ mkdir -p "$(dirname "$OUTPUT")"
 # --- SCREENSHOT ---
 case "$TYPE" in
   screen)
-    maim "$OUTPUT"
+    grim - | tee "$OUTPUT" | wl-copy --type image/png
     ;;
   window)
-    read -r X Y W H < <(
-      i3-msg -t get_tree | jq -r '
-        .. | select(.focused?) | "\(.rect.x) \(.rect.y) \(.rect.width) \(.rect.height)"
-      '
-    )
-    maim -g "${W}x${H}+${X}+${Y}" "$OUTPUT"
+    grim -g "$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused? == true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"')" "$OUTPUT"
+    ;;
+  area)
+    grim -g "$(slurp)" "$OUTPUT"
     ;;
 esac
 

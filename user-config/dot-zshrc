@@ -133,14 +133,14 @@ zle -N _aichat_zsh
 bindkey '^g' _aichat_zsh
 
 # Copy buffer to clipboard
-copy-buffer() { echo -n $BUFFER | xclip -selection clipboard }
+copy-buffer() { echo -n $BUFFER | wl-copy }
 zle -N copy-buffer
 bindkey '^y' copy-buffer                            # Ctrl+y
 
 
 
 export EDITOR='nvim'
-export VISUAL="kitty -e nvim"
+export VISUAL="kitty nvim"
 
 # Compilation flags
 export ARCHFLAGS="-arch $(uname -m)"
@@ -251,13 +251,10 @@ makecpp() {
 setopt HIST_IGNORE_SPACE
 
 
-# bun completions
-[ -s "/home/barinr/.bun/_bun" ] && source "/home/barinr/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-
-# Added by Antigravity CLI installer
-export PATH="/home/barinr/.local/bin:$PATH"
+# fzf theme
+export FZF_DEFAULT_OPTS=" \
+--color=bg+:#1c1c1c,bg:#060606,spinner:#a8a8a8,hl:#c2916a \
+--color=fg:#e4e4e8,header:#c2916a,info:#8c9cb8,pointer:#a8a8a8 \
+--color=marker:#b09080,fg+:#c7c7c7,prompt:#75a1c7,hl+:#c2916a \
+--color=border:#060606 \
+--multi"
