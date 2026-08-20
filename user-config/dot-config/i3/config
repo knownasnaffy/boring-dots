@@ -153,7 +153,7 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 # bindsym $mod+Shift+r restart
 
-bindsym $mod+p exec --no-startup-id ~/.local/bin/rofi-gpaste
+bindsym $mod+p exec --no-startup-id sh -c "cliphist list | rofi -dmenu | cliphist decode | wl-copy"
 
 mode "app" {
         bindsym b exec --no-startup-id /usr/bin/beeper; mode "default"
