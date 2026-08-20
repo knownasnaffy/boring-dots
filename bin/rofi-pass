@@ -9,7 +9,7 @@ type_secret() {
 
     sleep 0.2
 
-    xdotool type -- "$secret"
+    ydotool type -f - <<< "$secret"
 }
 
 get_password() {
