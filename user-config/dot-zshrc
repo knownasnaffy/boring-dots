@@ -220,11 +220,12 @@ function devcontainer_args() {
 EOF
 }
 
-function y() {
-    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-    command yazi "$@" --cwd-file="$tmp"
-    IFS= read -r -d '' cwd < "$tmp"
-    [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+fm() {
+    local tmp="$(mktemp -t ranger-cwd.XXXXXX)" cwd
+    ranger --choosedir="$tmp" "$@"
+    if cwd="$(<"$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
     rm -f -- "$tmp"
 }
 
