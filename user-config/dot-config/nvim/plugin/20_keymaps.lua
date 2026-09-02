@@ -62,10 +62,10 @@ local function move_or_exec(dir, cmd)
 end
 
 -- stylua: ignore start
-nmap('<C-w>h', move_or_exec( "h", "i3-msg focus left"), 'Move focus to the left window' )
-nmap('<C-w>l', move_or_exec( "l", "i3-msg focus right"), 'Move focus to the right window' )
-nmap('<C-w>j', move_or_exec( "j", "i3-msg focus down"), 'Move focus to the lower window' )
-nmap('<C-w>k', move_or_exec( "k", "i3-msg focus up"), 'Move focus to the upper window' )
+nmap('<C-w>h', move_or_exec( "h", "swaymsg focus left"), 'Move focus to the left window' )
+nmap('<C-w>l', move_or_exec( "l", "swaymsg focus right"), 'Move focus to the right window' )
+nmap('<C-w>j', move_or_exec( "j", "swaymsg focus down"), 'Move focus to the lower window' )
+nmap('<C-w>k', move_or_exec( "k", "swaymsg focus up"), 'Move focus to the upper window' )
 -- stylua: ignore end
 
 nmap('<C-`>', ':ToggleTerm<CR>', 'Toggle Terminal')
