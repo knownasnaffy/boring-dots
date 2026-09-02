@@ -250,6 +250,8 @@ makecpp() {
 # Don't save commands starting with a space in history
 setopt HIST_IGNORE_SPACE
 
+HISTSIZE=50000
+SAVEHIST=50000
 
 # fzf theme
 export FZF_DEFAULT_OPTS=" \
