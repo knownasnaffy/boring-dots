@@ -252,7 +252,7 @@ later(function()
     },
     -- Map of filetype to formatters
     -- Make sure that necessary CLI tool is available
-    formatters_by_ft = { lua = { 'stylua' }, python = { 'ruff' } },
+    formatters_by_ft = { lua = { 'stylua' }, python = { 'ruff' }, html = { 'prettier' } },
   })
 end)
 
