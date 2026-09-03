@@ -10,16 +10,37 @@ default_border none
 hide_edge_borders both
 gaps inner 12
 for_window [all] opacity set 0.95
+mouse_warping container
 
-exec --no-startup-id dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+# sway does not set DISPLAY/WAYLAND_DISPLAY in the systemd user environment
+# See FS#63021
+# Adapted from xorg's 50-systemd-user.sh, which achieves a similar goal.
+
+# Upstream refuses to set XDG_CURRENT_DESKTOP so we have to.
+exec --no-startup-id systemctl --user set-environment XDG_CURRENT_DESKTOP=sway
+exec --no-startup-id systemctl --user import-environment DISPLAY \
+                                         SWAYSOCK \
+                                         WAYLAND_DISPLAY \
+                                         XDG_CURRENT_DESKTOP
+
+exec --no-startup-id hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY \
+                                                  SWAYSOCK \
+                                                  XDG_CURRENT_DESKTOP=sway \
+                                                  WAYLAND_DISPLAY
+
+exec --no-startup-id wl-paste --type text --watch cliphist store
+exec --no-startup-id wl-paste --type image --watch cliphist store
 
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex-autostart --autostart --environment i3
 
-# xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
-# screen before suspend. Use loginctl lock-session to lock your screen.
-# exec --no-startup-id xss-lock --transfer-sleep-lock -- swaylock -c 222222
+# Idle configuration
+exec --no-startup-id swayidl -w \
+  timeout 300 'swaylock -c 222222' \
+  timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  before-sleep 'swaylock -c 222222'
 
 # exec --no-startup-id nm-applet
 
@@ -29,6 +50,13 @@ exec --no-startup-id mpvpaper -o "no-audio --loop-file=inf --no-osc --panscan=1"
 
 exec --no-startup-id qutebrowser
 exec --no-startup-id $terminal --detach zsh -c "figlet -f lean -w 300 WELCOME BACK && exec zsh -i"
+
+input type:touchpad {       
+    dwt enabled             
+    tap enabled             
+    natural_scroll disabled  
+    middle_emulation enabled
+}                           
 
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym Control+XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +2% && $refresh_i3status
@@ -131,6 +159,16 @@ bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
+# Sway has a "scratchpad", which is a bag of holding for windows.
+# You can send windows there and get them back later.
+
+# Move the currently focused window to the scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# Show the next scratchpad window or hide the focused scratchpad window.
+# If there are multiple scratchpad windows, this command cycles through them.
+bindsym $mod+minus scratchpad show
+
 bindsym $mod+TAB exec sway-windows-wrapper.sh
 
 workspace_auto_back_and_forth yes
@@ -155,7 +193,7 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 # bindsym $mod+Shift+r restart
 
-bindsym $mod+p exec --no-startup-id sh -c "cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+bindsym $mod+p exec --no-startup-id sh -c "cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy"
 
 mode "app" {
         bindsym b exec --no-startup-id /usr/bin/beeper; mode "default"
@@ -221,9 +259,9 @@ mode "window" {
 bindsym $mod+w mode "window"
 
 mode "bye" {
-        bindsym s exec systemctl poweroff; mode "default"
-        bindsym r exec systemctl reboot; mode "default"
-        bindsym e exec swaymsg exit; mode "default"
+        bindsym s exec python ~/.local/opt/hyprhalt/daemon/main.py --post-cmd "systemctl poweroff"; mode "default"
+        bindsym r exec python ~/.local/opt/hyprhalt/daemon/main.py --post-cmd "systemctl reboot"; mode "default"
+        bindsym e exec python ~/.local/opt/hyprhalt/daemon/main.py; mode "default"
         bindsym l exec --no-startup-id swaylock -c 222222; mode "default"
 
         bindsym q mode "default"
@@ -262,6 +300,7 @@ bindsym $mod+r mode "resize"
 
 bar {
   font pango:JetBrainsMono Nerd Font 12
+  position bottom
   separator_symbol "|"
   tray_padding 4
   colors {
