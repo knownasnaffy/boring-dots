@@ -374,6 +374,17 @@ end)
 
 
 now_if_args(function()
+  add({ 'https://github.com/MunifTanjim/nui.nvim', '/home/barinr/code/vibe/himalaya.nvim' })
+
+  require('himalaya').setup({
+    icons_enabled = false, -- set to true to use nerd font icons
+    wrap_folder_navigation = true,
+    -- Optional custom picker (e.g. telescope or fzf-lua override):
+    -- custom_select = function(items, opts, on_choice) ... end,
+  })
+end)
+
+now_if_args(function()
   add({ 'https://github.com/hat0uma/csvview.nvim' })
 
   require('csvview').setup({
