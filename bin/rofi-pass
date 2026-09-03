@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PASS_CLI=/usr/bin/pass
+
 shopt -s nullglob globstar
 
 set -o nounset
@@ -13,11 +15,11 @@ type_secret() {
 }
 
 get_password() {
-    pass show "$1" | head -n1
+    $PASS_CLI show "$1" | head -n1
 }
 
 get_otp() {
-    pass otp "$1" 2>/dev/null
+    $PASS_CLI otp "$1" 2>/dev/null
 }
 
 prefix=${PASSWORD_STORE_DIR-~/.password-store}
