@@ -12,6 +12,9 @@ gaps inner 12
 for_window [all] opacity set 0.95
 mouse_warping container
 
+client.focused    #6fbe80 #6fbe80 #2f2f2f
+client.urgent    #e08585 #e08585 #4f4f4f
+
 # sway does not set DISPLAY/WAYLAND_DISPLAY in the systemd user environment
 # See FS#63021
 # Adapted from xorg's 50-systemd-user.sh, which achieves a similar goal.
@@ -174,13 +177,18 @@ bindsym $mod+TAB exec sway-windows-wrapper.sh
 workspace_auto_back_and_forth yes
 force_display_urgency_hint 1500 ms
 
+workspace 2 layout tabbed
+
 assign [app_id="qutebrowser"] workspace number 2
+assign [app_id="vivaldi-stable"] workspace number 2
+
 assign [app_id="Beeper"] workspace number 3
 
 assign [app_id="spotube"] workspace number 4
 assign [app_id="Spotube"] workspace number 4
 
 assign [app_id="jetbrains-studio"] workspace number 9
+assign [app_id="antigravity"] workspace number 10
 
 for_window [title="NetManTUI"] floating enable
 for_window [title="NetManTUI"] resize set 840 680
@@ -310,7 +318,7 @@ bar {
 
     focused_workspace  #6fbe80 #6fbe80 #4f4f4f
     active_workspace   #3C6EB4 #294172 #FFFFFF
-    inactive_workspace #8C8C8C #4C4C4C #888888
+    inactive_workspace #5C5C5C #4C4C4C #888888
     urgent_workspace   #e08585 #e08585 #4f4f4f
     binding_mode       #b691d3 #A07CBC #FFFFFF
   }
