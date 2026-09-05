@@ -1,4 +1,4 @@
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/54fe0481-8712-4d23-8d39-9cebbca67192" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a3f1f141-067b-4645-810e-26c2849b3224" />
 
 # Boring Dots
 
