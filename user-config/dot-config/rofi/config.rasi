@@ -4,9 +4,9 @@
     scrollbar: true;
 
     /* Gruvbox dark colors */
-    gruvbox-dark-bg0-hard:     #1c1c1c;
-    gruvbox-dark-bg0:          #1c1c1c;
-    gruvbox-dark-bg2:          #404040;
+    gruvbox-dark-bg0-hard:     #060606;
+    gruvbox-dark-bg0:          #060606;
+    gruvbox-dark-bg2:          #303030;
     gruvbox-dark-fg0:          #e4e4e8;
     gruvbox-dark-fg1:          #e4e4e8;
     gruvbox-dark-red-dark:     #e08585;
@@ -67,7 +67,14 @@ configuration {
 
 window {
     background-color: @background;
-    border:           0;
+    border:           12 12 0 0;
+    height:           520;
+    width:            954;
+    border-color:     #066619aa;
+    anchor:           west;
+    location:         south west;
+    x-offset:         12;
+    y-offset:         -12;
     padding:          4;
 }
 
