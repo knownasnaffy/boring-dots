@@ -54,12 +54,12 @@ exec --no-startup-id mpvpaper -o "no-audio --loop-file=inf --no-osc --panscan=1"
 exec --no-startup-id qutebrowser
 exec --no-startup-id $terminal --detach zsh -c "figlet -f lean -w 300 WELCOME BACK && exec zsh -i"
 
-input type:touchpad {       
-    dwt enabled             
-    tap enabled             
-    natural_scroll disabled  
+input type:touchpad {
+    dwt enabled
+    tap enabled
+    natural_scroll disabled
     middle_emulation enabled
-}                           
+}
 
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym Control+XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +2% && $refresh_i3status
