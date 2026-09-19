@@ -1,0 +1,20 @@
+bar {
+  font pango:JetBrainsMono Nerd Font 12
+  position bottom
+  separator_symbol "|"
+  tray_padding 4
+  colors {
+    background #000000
+    statusline #FFFFFF
+    separator  #666666
+
+    focused_workspace  #6fbe80 #6fbe80 #4f4f4f
+    active_workspace   #3C6EB4 #294172 #FFFFFF
+    inactive_workspace #5C5C5C #4C4C4C #888888
+    urgent_workspace   #e08585 #e08585 #4f4f4f
+    binding_mode       #b691d3 #A07CBC #FFFFFF
+  }
+  status_command i3status
+}
+
+# vi:ft=swayconfig

@@ -1,11 +1,7 @@
 include ./config.d/00-general
 include ./config.d/05-behavior
 include ./config.d/10-styles-simple
-include ./config.d/15-styles-heavy
 include ./config.d/20-services-light
-include ./config.d/25-services-medium
-include ./config.d/30-services-heavy
-include ./config.d/35-apps
 include ./config.d/40-input
 include ./config.d/45-keybinds-special
 include ./config.d/50-keybinds-window
@@ -13,3 +9,5 @@ include ./config.d/55-keybinds-workspace
 include ./config.d/60-keybinds-submaps
 include ./config.d/65-app-rules
 include ./config.d/70-bar
+
+# vi:ft=swayconfig

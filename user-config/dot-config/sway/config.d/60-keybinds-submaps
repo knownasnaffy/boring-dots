@@ -1,0 +1,79 @@
+mode "app" {
+        bindsym a exec --no-startup-id /usr/bin/antigravity; mode "default"
+        bindsym b exec --no-startup-id /usr/bin/beeper; mode "default"
+        bindsym d exec --no-startup-id rofi -show drun; mode "default"
+        bindsym f exec --no-startup-id foot; mode "default"
+        bindsym l exec --no-startup-id lutris; mode "default"
+        bindsym s exec --no-startup-id spotube; mode "default"
+        bindsym v exec --no-startup-id vivaldi-stable; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+d mode "app"
+
+mode "open" {
+        bindsym p exec --no-startup-id ~/.local/bin/rofi-pass; mode "default"
+        bindsym t exec --no-startup-id rofi -show timer -modi timer:$HOME/.local/bin/rofi-timer; mode "default"
+        bindsym c exec --no-startup-id rofi -show calc -modi calc -no-show-match -no-sort > /dev/null; mode "default"
+        bindsym w exec --no-startup-id kitty -T NetManTUI nmtui; mode "default"
+        bindsym Shift+c exec --no-startup-id kitty -T CalTUI zsh -i -c "cal -3 && echo -e '\ncal [-y] [-1] [-3] [-m]' && exec zsh -i"; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+o mode "open"
+
+bindsym $mod+p exec --no-startup-id sh -c "cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy"
+
+mode "images" {
+        bindsym p exec --no-startup-id swayimg --gallery "$HOME/Pictures"; mode "default"
+        bindsym s exec --no-startup-id swayimg --gallery "$HOME/Pictures/Screenshots"; mode "default"
+        bindsym b exec --no-startup-id swayimg --gallery "$HOME/Downloads/Beeper"; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+mode "folder" {
+        bindsym p exec --no-startup-id ~/.local/bin/open_folder "$HOME/Pictures"; mode "default"
+        bindsym s exec --no-startup-id ~/.local/bin/open_folder "$HOME/Pictures/Screenshots"; mode "default"
+        bindsym d exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads"; mode "default"
+        bindsym b exec --no-startup-id ~/.local/bin/open_folder "$HOME/Downloads/Beeper"; mode "default"
+        bindsym o exec --no-startup-id ~/.local/bin/open_folder "$HOME/Documents"; mode "default"
+        bindsym v exec --no-startup-id ~/.local/bin/open_folder "$HOME/Videos"; mode "default"
+
+        bindsym i mode "images"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+f mode "folder"
+
+mode "bye" {
+        bindsym s exec python ~/.local/opt/hyprhalt/daemon/main.py --post-cmd "systemctl poweroff"; mode "default"
+        bindsym r exec python ~/.local/opt/hyprhalt/daemon/main.py --post-cmd "systemctl reboot"; mode "default"
+        bindsym e exec python ~/.local/opt/hyprhalt/daemon/main.py; mode "default"
+        bindsym l exec --no-startup-id swaylock -c 222222; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+b mode "bye"
+
+mode "screenshot" {
+        bindsym s exec --no-startup-id ~/.local/bin/screenshot --screen; mode "default"
+        bindsym w exec --no-startup-id ~/.local/bin/screenshot --window; mode "default"
+        bindsym a exec --no-startup-id ~/.local/bin/screenshot --area; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+s mode "screenshot"
+
+# vi:ft=swayconfig

@@ -1,0 +1,4 @@
+gaps inner 12
+for_window [all] opacity set 0.95
+
+# vi:ft=swayconfig

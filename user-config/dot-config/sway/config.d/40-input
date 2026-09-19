@@ -1,0 +1,8 @@
+input type:touchpad {
+    dwt enabled
+    tap enabled
+    natural_scroll disabled
+    middle_emulation enabled
+}
+
+# vi:ft=swayconfig

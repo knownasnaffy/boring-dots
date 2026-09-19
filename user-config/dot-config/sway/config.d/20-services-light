@@ -1,0 +1,31 @@
+# sway does not set DISPLAY/WAYLAND_DISPLAY in the systemd user environment
+# See FS#63021
+# Adapted from xorg's 50-systemd-user.sh, which achieves a similar goal.
+
+# Upstream refuses to set XDG_CURRENT_DESKTOP so we have to.
+exec --no-startup-id systemctl --user set-environment XDG_CURRENT_DESKTOP=sway
+exec --no-startup-id systemctl --user import-environment DISPLAY \
+                                         SWAYSOCK \
+                                         WAYLAND_DISPLAY \
+                                         XDG_CURRENT_DESKTOP
+
+exec --no-startup-id hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY \
+                                                  SWAYSOCK \
+                                                  XDG_CURRENT_DESKTOP=sway \
+                                                  WAYLAND_DISPLAY
+
+exec --no-startup-id wl-paste --type text --watch cliphist store
+exec --no-startup-id wl-paste --type image --watch cliphist store
+
+# Start XDG autostart .desktop files using dex. See also
+# https://wiki.archlinux.org/index.php/XDG_Autostart
+exec --no-startup-id dex-autostart --autostart --environment i3
+
+# Idle configuration
+exec --no-startup-id swayidl -w \
+  timeout 300 'swaylock -c 222222' \
+  timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  before-sleep 'swaylock -c 222222'
+
+# vi:ft=swayconfig

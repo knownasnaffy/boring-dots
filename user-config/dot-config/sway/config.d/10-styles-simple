@@ -1,0 +1,7 @@
+default_border none
+hide_edge_borders both
+
+client.focused    #6fbe80 #6fbe80 #2f2f2f
+client.urgent    #e08585 #e08585 #4f4f4f
+
+# vi:ft=swayconfig

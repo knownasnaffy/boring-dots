@@ -1,0 +1,18 @@
+assign [app_id="qutebrowser"] workspace number 2
+for_window [app_id="qutebrowser"] layout tabbed
+assign [app_id="vivaldi-stable"] workspace number 2
+
+assign [app_id="Beeper"] workspace number 3
+
+assign [app_id="spotube"] workspace number 4
+assign [app_id="Spotube"] workspace number 4
+
+assign [app_id="jetbrains-studio"] workspace number 9
+assign [app_id="antigravity"] workspace number 10
+
+for_window [title="NetManTUI"] floating enable
+for_window [title="NetManTUI"] resize set 840 680
+for_window [title="NetManTUI"] move position center
+for_window [title="CalTUI"] floating enable
+
+# vi:ft=swayconfig
