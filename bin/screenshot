@@ -65,10 +65,10 @@ case "$TYPE" in
     grim - | tee "$OUTPUT" | wl-copy --type image/png
     ;;
   window)
-    grim -g "$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused? == true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"')" "$OUTPUT"
+    grim -g "$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused? == true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"')" - | tee "$OUTPUT" | wl-copy --type image/png
     ;;
   area)
-    grim -g "$(slurp)" "$OUTPUT"
+    grim -g "$(slurp)" - | tee "$OUTPUT" | wl-copy --type image/png
     ;;
 esac
 
