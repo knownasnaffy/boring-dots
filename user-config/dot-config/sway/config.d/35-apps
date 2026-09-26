@@ -1,4 +1,4 @@
 exec --no-startup-id qutebrowser
-exec --no-startup-id $terminal --detach zsh -c "figlet -f lean -w 300 WELCOME BACK && exec zsh -i"
+exec --no-startup-id $terminal --detach zsh -c "figlet -f lean -w 300 WELCOME BACK && csakura -c matcha && exec zsh -i"
 
 # vi:ft=swayconfig
