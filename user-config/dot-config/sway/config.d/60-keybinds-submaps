@@ -86,13 +86,15 @@ mode "play" {
 
 mode "music" {
         bindsym Space exec --no-startup-id playerctl play-pause; mode "default"
-        bindsym n exec --no-startup-id playerctl next; mode "default"
-        bindsym Shift+n exec --no-startup-id playerctl previous; mode "default"
         bindsym e exec --no-startup-id pkill -x mpv; mode "default"
 
-        bindsym i exec --no-startup-id sh -c "notify-send '$(playerctl metadata title)' '$(playerctl metadata artist)'"; mode "default"
+        bindsym n exec --no-startup-id playerctl next; mode "default"
+        bindsym Shift+n exec --no-startup-id playerctl previous; mode "default"
 
-        bindsym s exec --no-startup-id mpv --no-video --loop-playlist=yes --shuffle ~/Music/spotdl/; mode "default"
+        bindsym s exec --no-startup-id playerctl position 5+
+        bindsym Shift+s exec --no-startup-id playerctl position 5-
+
+        bindsym i exec --no-startup-id sh -c "notify-send '$(playerctl metadata title)' '$(playerctl metadata artist)'"; mode "default"
 
         bindsym p mode "play"
 
