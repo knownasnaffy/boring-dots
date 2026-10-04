@@ -1,0 +1,14 @@
+#!/bin/sh
+
+BASE="$HOME/Music"
+
+DIR=$(
+    find "$BASE" -type d ! -path '*/.*' -print0 |
+    while IFS= read -r -d '' dir; do
+        find "$dir" -type f -iname '*.mp3' ! -path '*/.*' -print -quit |
+            grep -q . && printf '%s\n' "$dir"
+    done |
+    rofi -dmenu -i -p "Music"
+)
+
+[ -n "$DIR" ] && (pkill -x mpv; mpv --no-video --loop-playlist=yes --shuffle "$DIR")

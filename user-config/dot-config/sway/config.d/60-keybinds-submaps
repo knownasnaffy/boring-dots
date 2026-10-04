@@ -76,4 +76,28 @@ mode "screenshot" {
 
 bindsym $mod+s mode "screenshot"
 
+mode "play" {
+        bindsym p exec --no-startup-id ~/.local/bin/rofi-playlist; mode "default"
+        bindsym s exec --no-startup-id ~/.local/bin/rofi-song; mode "default"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+mode "music" {
+        bindsym Space exec --no-startup-id playerctl play-pause; mode "default"
+        bindsym n exec --no-startup-id playerctl next; mode "default"
+        bindsym Shift+n exec --no-startup-id playerctl previous; mode "default"
+        bindsym e exec --no-startup-id pkill -x mpv; mode "default"
+
+        bindsym s exec --no-startup-id mpv --no-video --loop-playlist=yes --shuffle ~/Music/spotdl/; mode "default"
+
+        bindsym p mode "play"
+
+        bindsym q mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+m mode "music"
+
 # vi:ft=swayconfig

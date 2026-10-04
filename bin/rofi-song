@@ -1,0 +1,16 @@
+#!/bin/sh
+
+BASE="$HOME/Music"
+
+SONG=$(
+    find "$BASE" -type f \
+        ! -path '*/.*' \
+        -iname '*.mp3' \
+        -print |
+    rofi -dmenu -i -p "Song"
+)
+
+[ -n "$SONG" ] && (
+    pkill -x mpv
+    mpv --loop=inf --no-audio-display "$SONG"
+)
