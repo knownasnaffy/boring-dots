@@ -10,6 +10,9 @@ assign [app_id="Spotube"] workspace number 4
 assign [app_id="jetbrains-studio"] workspace number 9
 assign [app_id="antigravity"] workspace number 10
 
+for_window [app_id="swayimg"] opacity set 1
+for_window [app_id="mpv"] opacity set 1
+
 for_window [title="NetManTUI"] floating enable
 for_window [title="NetManTUI"] resize set 840 680
 for_window [title="NetManTUI"] move position center
