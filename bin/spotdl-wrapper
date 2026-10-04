@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+BASE="$HOME/Music/spotdl"
+OUTPUT_DIR="."
+ARGS=()
+
+while (($#)); do
+    case "$1" in
+        -d|--directory)
+            if [[ -z "$2" ]]; then
+                echo "error: $1 requires a directory name" >&2
+                exit 1
+            fi
+
+            OUTPUT_DIR="$2"
+            mkdir -p "$BASE/$OUTPUT_DIR"
+            shift 2
+            ;;
+
+        *)
+            ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+bwrap \
+    --ro-bind /usr /usr \
+    --ro-bind /bin /bin \
+    --ro-bind /lib /lib \
+    --ro-bind /lib64 /lib64 \
+    --ro-bind /etc /etc \
+    --proc /proc \
+    --dev /dev \
+    --tmpfs /tmp \
+    --dir /home \
+    --dir /home/$USER \
+    --bind "$BASE" "/home/$USER" \
+    --unshare-all \
+    --share-net \
+    --new-session \
+    spotdl \
+        --output "/home/$USER/$OUTPUT_DIR/{title}.{output-ext}" \
+        "${ARGS[@]}"
