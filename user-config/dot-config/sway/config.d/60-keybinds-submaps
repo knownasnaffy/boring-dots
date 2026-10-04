@@ -90,6 +90,8 @@ mode "music" {
         bindsym Shift+n exec --no-startup-id playerctl previous; mode "default"
         bindsym e exec --no-startup-id pkill -x mpv; mode "default"
 
+        bindsym i exec --no-startup-id sh -c "notify-send '$(playerctl metadata title)' '$(playerctl metadata artist)'"; mode "default"
+
         bindsym s exec --no-startup-id mpv --no-video --loop-playlist=yes --shuffle ~/Music/spotdl/; mode "default"
 
         bindsym p mode "play"
