@@ -24,7 +24,6 @@
         "ctrl+d"
       ]
     },
-    "QUIT_APP": "disabled",
     "TOGGLE_FILTER_UNREAD": "disabled",
     "ARCHIVE_ALL_READ_THREADS": "disabled",
     "TOGGLE_THREAD_ARCHIVE": {
